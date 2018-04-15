@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{{ torrent.name }} - magnetico</title>
+    <title>{{ .torrent.name }} - magnetico</title>
     <link rel="stylesheet" href="static/styles/reset.css">
     <link rel="stylesheet" href="static/styles/essential.css">
     <link rel="stylesheet" href="static/styles/torrent.css">
@@ -17,26 +17,26 @@
 </header>
 <main>
     <div id="title">
-        <h2>{{ torrent.name }}</h2>
-        <a href="magnet:?xt=urn:btih:{{ torrent.info_hash }}&dn={{ torrent.name }}">
+        <h2>{{ .torrent.name }}</h2>
+        <a href="magnet:?xt=urn:btih:{{ .torrent.info_hash }}&dn={{ .torrent.name }}">
             <img src="static/assets/magnet.gif" alt="Magnet link"
                          title="Download this torrent using magnet" />
-            <small>{{ torrent.info_hash }}</small>
+            <small>{{ .torrent.info_hash }}</small>
         </a>
     </div>
 
     <table>
         <tr>
             <th scope="row">Size</th>
-            <td>{{ torrent.size }}</td>
+            <td>{{ .torrent.size }}</td>
         </tr>
         <tr>
             <th scope="row">Discovered on</th>
-            <td>{{ torrent.discovered_on }}</td>
+            <td>{{ .torrent.discovered_on }}</td>
         </tr>
         <tr>
             <th scope="row">Files</th>
-            <td>{{ torrent.files|length }}</td>
+            <td>{{ .torrent.files }}</td>
         </tr>
     </table>
 
@@ -44,12 +44,12 @@
     <noscript>
         <pre>
 {% for file in torrent.files -%}
-{{ file.path }}{{ "\n" }}
+{{ .path }}{{ "\n" }}
 {%- endfor %}
         </pre>
     </noscript>
     <!-- Content of this element will be overwritten by the script -->
-    <pre>{% for file in torrent.files -%}{{ file.path }}{{ "\t" + file.size }}{{ "\n" }}{%- endfor %}</pre>
+    <pre>{% for file in torrent.files -%}{{ .path }}{{ "\t" .size }}{{ "\n" }}{%- endfor %}</pre>
 </main>
 </body>
 </html>

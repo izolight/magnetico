@@ -2,21 +2,17 @@ package main
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"os"
-	"strings"
-
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"encoding/hex"
-	"magnetico/persistence"
+	"github.com/izolight/magnetico/pkg/persistence"
 	"strconv"
 	"time"
-	"unsafe"
 )
 
 const N_TORRENTS = 20
@@ -68,7 +64,7 @@ func main() {
 	router.HandleFunc("/torrents", torrentsHandler)
 	router.HandleFunc("/torrents/{infohash:[a-z0-9]{40}}", torrentsInfohashHandler)
 	router.HandleFunc("/statistics", statisticsHandler)
-	router.PathPrefix("/static").HandlerFunc(staticHandler)
+	router.PathPrefix("/static").Handler(http.FileServer(http.Dir("./static/")))
 
 	router.HandleFunc("/feed", feedHandler)
 
@@ -103,14 +99,14 @@ func main() {
 	}
 
 	templates = make(map[string]*template.Template)
-	templates["feed"] = template.Must(template.New("feed").Parse(string(mustAsset("templates/feed.xml"))))
-	templates["homepage"] = template.Must(template.New("homepage").Parse(string(mustAsset("templates/homepage.html"))))
-	templates["statistics"] = template.Must(template.New("statistics").Parse(string(mustAsset("templates/statistics.html"))))
-	templates["torrent"] = template.Must(template.New("torrent").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrent.html"))))
-	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrents.html"))))
+	templates["feed"] = template.Must(template.New("feed").ParseFiles("templates/feed.xml"))
+	templates["homepage"] = template.Must(template.New("homepage").ParseFiles("templates/homepage.html"))
+	templates["statistics"] = template.Must(template.New("statistics").ParseFiles("templates/statistics.html"))
+	templates["torrent"] = template.Must(template.New("torrent").Funcs(templateFunctions).ParseFiles("templates/torrent.html"))
+	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).ParseFiles("templates/torrents.html"))
 
 	var err error
-	database, err = persistence.MakeDatabase("sqlite3:///home/bora/.local/share/magneticod/database.sqlite3", unsafe.Pointer(logger))
+	database, err = persistence.MakeDatabase("sqlite3:///home/bora/.local/share/magneticod/database.sqlite3", logger)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -169,12 +165,11 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		torrents, err = database.QueryTorrents(
 			queryValues.Get("search"),
-			persistence.BY_DISCOVERED_ON,
-			true,
-			false,
-			N_TORRENTS,
 			qAfter,
+			persistence.ByDiscoveredOn,
 			true,
+			1,
+			N_TORRENTS,
 		)
 	}
 	if err != nil {
@@ -182,7 +177,7 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: for testing, REMOVE
-	torrents[2].HasReadme = true
+	//torrents[2].HasReadme = true
 
 	templates["torrents"].Execute(w, TorrentsTD{
 		Search:          "",
@@ -221,23 +216,21 @@ func newestTorrentsHandler(w http.ResponseWriter, r *http.Request) {
 	var torrents []persistence.TorrentMetadata
 	if qBefore != -1 {
 		torrents, err = database.QueryTorrents(
-			"",
-			persistence.BY_DISCOVERED_ON,
-			true,
-			false,
-			N_TORRENTS,
+			queryValues.Get("search"),
 			qBefore,
-			false,
+			persistence.ByDiscoveredOn,
+			true,
+			1,
+			N_TORRENTS,
 		)
 	} else {
 		torrents, err = database.QueryTorrents(
-			"",
-			persistence.BY_DISCOVERED_ON,
-			false,
-			false,
-			N_TORRENTS,
+			queryValues.Get("search"),
 			qAfter,
+			persistence.ByDiscoveredOn,
 			true,
+			1,
+			N_TORRENTS,
 		)
 	}
 	if err != nil {
@@ -276,29 +269,4 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 
 func feedHandler(w http.ResponseWriter, r *http.Request) {
 
-}
-
-func staticHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := Asset(r.URL.Path[1:])
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-
-	var contentType string
-	if strings.HasSuffix(r.URL.Path, ".css") {
-		contentType = "text/css; charset=utf-8"
-	} else { // fallback option
-		contentType = http.DetectContentType(data)
-	}
-	w.Header().Set("Content-Type", contentType)
-	w.Write(data)
-}
-
-func mustAsset(name string) []byte {
-	data, err := Asset(name)
-	if err != nil {
-		log.Panicf("Could NOT access the requested resource `%s`: %s (please inform us, this is a BUG!)", name, err.Error())
-	}
-	return data
 }
