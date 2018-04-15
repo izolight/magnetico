@@ -1,9 +1,9 @@
 all: magneticod magneticow
 
 magneticod:
-	go install magnetico/magneticod
+	go install ./cmd/magneticod
 
 magneticow:
 	# TODO: minify files!
-	go-bindata -o="magneticow/bindata.go" -prefix="magneticow/data/" magneticow/data/...
-	go install magnetico/magneticow
+	go-bindata -o="cmd/magneticow/bindata.go" -prefix="cmd/magneticow/data/" cmd/magneticow/data/...
+	go install ./cmd/magneticow
