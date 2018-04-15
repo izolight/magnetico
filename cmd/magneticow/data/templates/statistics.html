@@ -13,8 +13,8 @@
 <header>
     <script>
         var discoveryRateData = [{
-            x: {{ dates | safe }},
-            y: {{ amounts | safe }},
+            x: {{ .dates }},
+            y: {{ .amounts }},
             mode: "lines+markers"
         }];
     </script>

@@ -2,21 +2,19 @@ package main
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"os"
-	"strings"
-
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"encoding/hex"
-	"magnetico/persistence"
+	"github.com/izolight/magnetico/pkg/persistence"
 	"strconv"
 	"time"
-	"unsafe"
+	"strings"
+	"log"
 )
 
 const N_TORRENTS = 20
@@ -110,7 +108,7 @@ func main() {
 	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrents.html"))))
 
 	var err error
-	database, err = persistence.MakeDatabase("sqlite3:///home/bora/.local/share/magneticod/database.sqlite3", unsafe.Pointer(logger))
+	database, err = persistence.MakeDatabase("sqlite3:///home/bora/.local/share/magneticod/database.sqlite3", logger)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -169,12 +167,11 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		torrents, err = database.QueryTorrents(
 			queryValues.Get("search"),
-			persistence.BY_DISCOVERED_ON,
-			true,
-			false,
-			N_TORRENTS,
 			qAfter,
+			persistence.ByDiscoveredOn,
 			true,
+			1,
+			N_TORRENTS,
 		)
 	}
 	if err != nil {
@@ -182,7 +179,7 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: for testing, REMOVE
-	torrents[2].HasReadme = true
+	//torrents[2].HasReadme = true
 
 	templates["torrents"].Execute(w, TorrentsTD{
 		Search:          "",
@@ -221,23 +218,21 @@ func newestTorrentsHandler(w http.ResponseWriter, r *http.Request) {
 	var torrents []persistence.TorrentMetadata
 	if qBefore != -1 {
 		torrents, err = database.QueryTorrents(
-			"",
-			persistence.BY_DISCOVERED_ON,
-			true,
-			false,
-			N_TORRENTS,
+			queryValues.Get("search"),
 			qBefore,
-			false,
+			persistence.ByDiscoveredOn,
+			true,
+			1,
+			N_TORRENTS,
 		)
 	} else {
 		torrents, err = database.QueryTorrents(
-			"",
-			persistence.BY_DISCOVERED_ON,
-			false,
-			false,
-			N_TORRENTS,
+			queryValues.Get("search"),
 			qAfter,
+			persistence.ByDiscoveredOn,
 			true,
+			1,
+			N_TORRENTS,
 		)
 	}
 	if err != nil {

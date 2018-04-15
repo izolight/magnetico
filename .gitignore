@@ -1,7 +1,7 @@
 vendor/
 .idea/
 Gopkg.lock
-magneticow/bindata.go
+bindata.go
 
 
 # Created by https://www.gitignore.io/api/go,linux,macos,windows
