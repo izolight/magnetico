@@ -223,8 +223,31 @@ func (db *sqlite3Database) GetStatistics(n uint, granularity Granularity, to tim
 }
 
 func (db *sqlite3Database) GetNewestTorrents(amount int, since int64) ([]TorrentMetadata, error) {
-	// TODO
-	return nil, nil
+	rows, err := db.conn.Query(`
+		SELECT
+		info_hash,
+		name,
+		total_size,
+		discovered_on
+		FROM torrents
+		WHERE discovered_on <= ?
+		LIMIT ?`, since, amount)
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	torrents := make([]TorrentMetadata, amount)
+
+	for rows.Next() {
+		var tm TorrentMetadata
+		err = rows.Scan(&tm.InfoHash, &tm.Name, &tm.TotalSize, &tm.DiscoveredOn)
+		if err != nil {
+			return nil, err
+		}
+		torrents = append(torrents, tm)
+	}
+
+	return torrents, nil
 }
 
 

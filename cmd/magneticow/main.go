@@ -1,26 +1,39 @@
 package main
 
 import (
-	"html/template"
-	"net/http"
-	"os"
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"html/template"
+	"net/http"
+	"os"
 
 	"encoding/hex"
+	"github.com/Wessie/appdirs"
 	"github.com/izolight/magnetico/pkg/persistence"
-	"strconv"
-	"time"
-	"strings"
+	"github.com/jessevdk/go-flags"
 	"log"
+	"path"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const N_TORRENTS = 20
 
 var templates map[string]*template.Template
 var database persistence.Database
+
+type cmdFlags struct {
+	DatabaseURL string `long:"database" description:"URL of the database."`
+	Verbose     []bool `short:"v" long:"verbose" description:"Increases verbosity."`
+}
+
+type opFlags struct {
+	DatabaseURL string
+	Verbosity   int
+}
 
 // ========= TD: TemplateData =========
 type HomepageTD struct {
@@ -57,16 +70,33 @@ func main() {
 	defer logger.Sync()
 	zap.ReplaceGlobals(logger)
 
+	opFlags, err := parseFlags()
+	if err != nil {
+		return
+	}
+
 	zap.L().Info("magneticow v0.7.0 has been started.")
 	zap.L().Info("Copyright (C) 2017  Mert Bora ALPER <bora@boramalper.org>.")
 	zap.L().Info("Dedicated to Cemile Binay, in whose hands I thrived.")
+
+	switch opFlags.Verbosity {
+	case 0:
+		loggerLevel.SetLevel(zap.WarnLevel)
+	case 1:
+		loggerLevel.SetLevel(zap.InfoLevel)
+	default: // Default: i.e. in case of 2 or more.
+		// TODO: print the caller (function)'s name and line number!
+		loggerLevel.SetLevel(zap.DebugLevel)
+	}
+
+	zap.ReplaceGlobals(logger)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", rootHandler)
 	router.HandleFunc("/torrents", torrentsHandler)
 	router.HandleFunc("/torrents/{infohash:[a-z0-9]{40}}", torrentsInfohashHandler)
 	router.HandleFunc("/statistics", statisticsHandler)
-	router.PathPrefix("/static").HandlerFunc(staticHandler)
+	router.PathPrefix("/static").Handler(http.FileServer(http.Dir("./static/")))
 
 	router.HandleFunc("/feed", feedHandler)
 
@@ -101,14 +131,13 @@ func main() {
 	}
 
 	templates = make(map[string]*template.Template)
-	templates["feed"] = template.Must(template.New("feed").Parse(string(mustAsset("templates/feed.xml"))))
-	templates["homepage"] = template.Must(template.New("homepage").Parse(string(mustAsset("templates/homepage.html"))))
-	templates["statistics"] = template.Must(template.New("statistics").Parse(string(mustAsset("templates/statistics.html"))))
-	templates["torrent"] = template.Must(template.New("torrent").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrent.html"))))
-	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrents.html"))))
+	templates["feed"] = template.Must(template.New("feed").ParseFiles("templates/feed.xml"))
+	templates["homepage"] = template.Must(template.New("homepage").ParseFiles("templates/homepage.html"))
+	templates["statistics"] = template.Must(template.New("statistics").ParseFiles("templates/statistics.html"))
+	templates["torrent"] = template.Must(template.New("torrent").Funcs(templateFunctions).ParseFiles("templates/torrent.html"))
+	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).ParseFiles("templates/torrents.html"))
 
-	var err error
-	database, err = persistence.MakeDatabase("sqlite3:///home/bora/.local/share/magneticod/database.sqlite3", logger)
+	database, err = persistence.MakeDatabase(opFlags.DatabaseURL, logger)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -296,4 +325,27 @@ func mustAsset(name string) []byte {
 		log.Panicf("Could NOT access the requested resource `%s`: %s (please inform us, this is a BUG!)", name, err.Error())
 	}
 	return data
+}
+
+func parseFlags() (*opFlags, error) {
+	opF := new(opFlags)
+	cmdF := new(cmdFlags)
+
+	_, err := flags.Parse(cmdF)
+	if err != nil {
+		return nil, err
+	}
+
+	if cmdF.DatabaseURL == "" {
+		opF.DatabaseURL = "sqlite3://" + path.Join(
+			appdirs.UserDataDir("magneticod", "", "", false),
+			"database.sqlite3",
+		)
+	} else {
+		opF.DatabaseURL = cmdF.DatabaseURL
+	}
+
+	opF.Verbosity = len(cmdF.Verbose)
+
+	return opF, nil
 }
