@@ -341,6 +341,10 @@ func (db *sqlite3Database) GetStatistics(n uint, to string) (*Statistics, error)
 	if err != nil {
 		return nil, fmt.Errorf("parsing @to error: %s", err.Error())
 	}
+	zap.L().Debug("Parsed Date for statistics", zap.Time("to_time", *to_time), zap.Int("granularity", int(granularity)))
+	// TODO
+
+	return nil, nil
 }
 
 func (db *sqlite3Database) setupDatabase() error {
