@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 	"unicode/utf8"
 	"net/url"
+	"github.com/lib/pq"
 )
 
 type postgresDatabase struct {
@@ -97,17 +98,23 @@ func (db *postgresDatabase) AddNewTorrent(infoHash []byte, name string, files []
 		return fmt.Errorf("could not insert torrent with name %s and bytes % x %s", name, name, err.Error())
 	}
 
+	stmt, err := tx.Prepare(pq.CopyIn("files", "torrent_id", "size", "path"))
+	if err != nil {
+		return err
+	}
 	for _, file := range files {
-		_, err = tx.Exec(`INSERT INTO files (
-				torrent_id, 
-				size, 
-				path
-			) VALUES ($1, $2, $3::VARCHAR);`,
-			lastInsertId, file.Size, fixUTF8Encoding(file.Path),
-		)
+		_, err := stmt.Exec(lastInsertId, file.Size, fixUTF8Encoding(file.Path))
 		if err != nil {
 			return fmt.Errorf( "couldn't insert file with path %s and bytes % x %s", file.Path, file.Path, err.Error())
 		}
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return err
+	}
+	err = stmt.Close()
+	if err != nil {
+		return err
 	}
 
 	err = tx.Commit()
