@@ -6,19 +6,19 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path"
+	"runtime/pprof"
 	"time"
 
 	"github.com/jessevdk/go-flags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/izolight/magnetico/cmd/magneticod/bittorrent"
-	"github.com/izolight/magnetico/cmd/magneticod/dht"
+	"github.com/boramalper/magnetico/cmd/magneticod/bittorrent"
+	"github.com/boramalper/magnetico/cmd/magneticod/dht"
 
-	"github.com/izolight/magnetico/pkg/persistence"
-	"runtime/pprof"
 	"github.com/Wessie/appdirs"
-	"path"
+	"github.com/boramalper/magnetico/pkg/persistence"
 )
 
 type cmdFlags struct {
@@ -38,7 +38,7 @@ type opFlags struct {
 	TrawlerMlInterval time.Duration
 
 	Verbosity int
-	Profile string
+	Profile   string
 }
 
 func main() {
@@ -77,7 +77,7 @@ func main() {
 
 	switch opFlags.Profile {
 	case "cpu":
-		file, err := os.OpenFile("magneticod_cpu.prof", os.O_CREATE | os.O_WRONLY, 0755)
+		file, err := os.OpenFile("magneticod_cpu.prof", os.O_CREATE|os.O_WRONLY, 0755)
 		if err != nil {
 			zap.L().Panic("Could not open the cpu profile file!", zap.Error(err))
 		}
@@ -145,9 +145,9 @@ func parseFlags() (*opFlags, error) {
 
 	if cmdF.DatabaseURL == "" {
 		opF.DatabaseURL = "sqlite3://" + path.Join(
-				appdirs.UserDataDir("magneticod", "", "", false),
-				"database.sqlite3",
-			)
+			appdirs.UserDataDir("magneticod", "", "", false),
+			"database.sqlite3",
+		)
 	} else {
 		opF.DatabaseURL = cmdF.DatabaseURL
 	}

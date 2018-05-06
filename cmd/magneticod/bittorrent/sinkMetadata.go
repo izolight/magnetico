@@ -9,8 +9,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/izolight/magnetico/cmd/magneticod/dht/mainline"
-	"github.com/izolight/magnetico/pkg/persistence"
+	"github.com/boramalper/magnetico/cmd/magneticod/dht/mainline"
+	"github.com/boramalper/magnetico/pkg/persistence"
 )
 
 type Metadata struct {
@@ -29,12 +29,12 @@ type Peer struct {
 }
 
 type MetadataSink struct {
-	clientID    []byte
-	deadline    time.Duration
-	drain       chan Metadata
+	clientID           []byte
+	deadline           time.Duration
+	drain              chan Metadata
 	incomingInfoHashes map[[20]byte]struct{}
-	terminated  bool
-	termination chan interface{}
+	terminated         bool
+	termination        chan interface{}
 }
 
 func NewMetadataSink(deadline time.Duration) *MetadataSink {

@@ -1,6 +1,16 @@
 package main
 
 import (
+	"encoding/hex"
+	"html/template"
+	"log"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+	"unsafe"
+
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
@@ -9,15 +19,7 @@ import (
 	"net/http"
 	"os"
 
-	"encoding/hex"
-	"github.com/Wessie/appdirs"
-	"github.com/izolight/magnetico/pkg/persistence"
-	"github.com/jessevdk/go-flags"
-	"log"
-	"path"
-	"strconv"
-	"strings"
-	"time"
+	"github.com/boramalper/magnetico/pkg/persistence"
 )
 
 const N_TORRENTS = 20
