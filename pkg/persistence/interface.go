@@ -56,7 +56,7 @@ const (
 )
 
 type Statistics struct {
-	N uint64
+	N uint
 
 	// All these slices below have the exact length equal to the Period.
 	NTorrents []uint64

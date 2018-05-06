@@ -342,12 +342,12 @@ func (db *sqlite3Database) GetFiles(infoHash []byte) ([]File, error) {
 	return files, nil
 }
 
-func (db *sqlite3Database) GetStatistics(n uint, to string) (*Statistics, error) {
-	to_time, granularity, err := ParseISO8601(to)
+func (db *sqlite3Database) GetStatistics(n uint, from string) (*Statistics, error) {
+	from_time, granularity, err := ParseISO8601(from)
 	if err != nil {
-		return nil, fmt.Errorf("parsing @to error: %s", err.Error())
+		return nil, fmt.Errorf("parsing @from error: %s", err.Error())
 	}
-	zap.L().Debug("Parsed Date for statistics", zap.Time("to_time", *to_time), zap.Int("granularity", int(granularity)))
+	zap.L().Debug("Parsed Date for statistics", zap.Time("from_time", *from_time), zap.Int("granularity", int(granularity)))
 	// TODO
 
 	return nil, nil
