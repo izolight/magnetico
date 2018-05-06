@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>{% if .Search %}"{{ .Search}}"{% else %}Most recent torrents{% endif %} - magneticow</title>
+    <title>{{ if .Search }}"{{ .Search}}"{{ else }}Most recent torrents{{ end }} - magneticow</title>
     <link rel="stylesheet" href="static/styles/reset.css">
     <link rel="stylesheet" href="static/styles/essential.css">
     <link rel="stylesheet" href="static/styles/torrents.css">
@@ -25,65 +25,77 @@
             <tr>
                 <th><!-- Magnet link --></th>
                 <th>
-                {% if .SortedBy == "name ASC" %}
+                {{ if eq .OrderBy "name ASC" }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=name+DESC">Name ▲</a>
-                {% elif .SortedBy == "name DESC" %}
+                {{ else if eq .OrderBy "name DESC" }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=name+ASC">Name ▼</a>
-                {% else %}
+                {{ else }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=name+ASC">Name</a>
-                {% endif %}
+                {{ end }}
                 </th>
                 <th>
-                {% if .SortedBy == "total_size ASC" %}
+                {{ if eq .OrderBy "total_size ASC" }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=total_size+DESC">Size ▲</a>
-                {% elif .SortedBy == "total_size DESC" %}
+                {{ else if eq .OrderBy "total_size DESC" }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=total_size+ASC">Size ▼</a>
-                {% else %}
+                {{ else}}
                     <a href="/torrents/?search={{ .Search }}&sort_by=total_size+ASC">Size</a>
-                {% endif %}
+                {{ end}}
                 </th>
                 <th>
-                {% if SortedBy == "discovered_on ASC" %}
+                {{ if eq .OrderBy "discovered_on ASC" }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=discovered_on+DESC">Discovered on ▲</a>
-                {% elif .SortedBy == "discovered_on DESC" %}
+                {{ else if eq .OrderBy "discovered_on DESC" }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=discovered_on+ASC">Discovered on ▼</a>
-                {% else %}
+                {{ else }}
                     <a href="/torrents/?search={{ .Search }}&sort_by=discovered_on+DESC">Discovered on</a>
-                {% endif %}
+                {{ end }}
                 </th>
             </tr>
         </thead>
         <tbody>
-        {% range .Torrents %}
+        {{ range .Torrents }}
             <tr>
-                <td><a href="magnet:?xt=urn:btih:{{ .info_hash }}&dn={{ .name }}">
-                    <img src="static/assets/magnet.gif') }}" alt="Magnet link"
+                <td><a href="magnet:?xt=urn:btih:{{ bytesToHex .InfoHash }}&dn={{ .Name }}">
+                    <img src="static/assets/magnet.gif" alt="Magnet link"
                          title="Download this torrent using magnet" /></a></td>
-                <td><a href="/torrents/{{ .info_hash }}/{{ .name }}">{{ .name }}</a></td>
-                <td>{{ .size }}</td>
-                <td>{{ .discovered_on }}</td>
+                <td><a href="/torrents/{{ bytesToHex .InfoHash }}/{{ .Name }}">{{ .Name }}</a></td>
+                <td>{{ humanizeSize .Size }}</td>
+                <td>{{ unixTimeToYearMonthDay .DiscoveredOn }}</td>
             </tr>
-        {% endfor %}
+        {{ end }}
         </tbody>
     </table>
 </main>
 <footer>
 
     <form action="/torrents" method="get">
-        <button {% if page == 0 %}disabled{% endif %}>Previous</button>
+        <button {{ if .NextPageExists }}disabled{{ end }}>Previous</button>
         <input type="text" name="search" value="{{ .Search }}" hidden>
-    {% if sorted_by %}
-        <input type="text" name="sort_by" value="{{ .SortedBy }}" hidden>
-    {% endif %}
-        <input type="number" name="page" value="{{ .After }}" hidden>
+        <input type="number" name="epoch" value="{{ .Epoch }}" hidden>
+        {{ if .OrderBy }}
+        <input type="text" name="orderBy" value="{{ .OrderBy }}" hidden>
+        {{ end }}
+        {{ if .Ascending }}
+        <input type="text" name="ascending" value="{{ .Ascending }}" hidden>
+        {{ end}}
+        <input type="number" name="limit" value="{{ .Limit }}" hidden>
+        <input type="text" name="lastOrderedValue" value="{{ .LastOrderedValue }}" hidden>
+        <input type="text" name="lastID" value="{{ .LastID }}" hidden>
     </form>
     <form action="/torrents" method="get">
-        <button {% if not next_page_exists %}disabled{% endif %}>Next</button>
+        <button {{ if not .NextPageExists }}disabled{{ end }}>Next</button>
         <input type="text" name="search" value="{{ .Search }}" hidden>
-    {% if sorted_by %}
-        <input type="text" name="sort_by" value="{{ .SortedBy }}" hidden>
-    {% endif %}
-        <input type="number" name="page" value="{{ .Before }}" hidden>
+        <input type="number" name="epoch" value="{{ .Epoch }}" hidden>
+        {{ if .OrderBy }}
+        <input type="text" name="orderBy" value="{{ .OrderBy }}" hidden>
+        {{ end }}
+        {{ if .Ascending }}
+        <input type="text" name="ascending" value="{{ .Ascending }}" hidden>
+        {{ end}}
+        <input type="number" name="limit" value="{{ .Limit }}" hidden>
+        <input type="text" name="lastOrderedValue" value="{{ .LastOrderedValue }}" hidden>
+        <input type="text" name="lastID" value="{{ .LastID }}" hidden>
     </form>
 </footer>
 </body>

@@ -160,6 +160,13 @@ func (db *sqlite3Database) GetNumberOfTorrents() (uint, error) {
 	return n, nil
 }
 
+type queryTD struct {
+	DoJoin    bool
+	FirstPage bool
+	OrderOn   string
+	Ascending bool
+}
+
 func (db *sqlite3Database) QueryTorrents(
 	query string,
 	epoch int64,
@@ -181,7 +188,8 @@ func (db *sqlite3Database) QueryTorrents(
 
 	// executeTemplate is used to prepare the SQL query, WITH PLACEHOLDERS FOR USER INPUT.
 	sqlQuery := executeTemplate(`
-		SELECT info_hash
+		SELECT id
+	         , info_hash
 			 , name
 			 , total_size
 			 , discovered_on
@@ -195,19 +203,14 @@ func (db *sqlite3Database) QueryTorrents(
 			WHERE torrents_idx MATCH ?
 		) AS idx USING(id)
 	{{ end }}
-		WHERE     modified_on <= ?
-	{{ if not FirstPage }}
+		WHERE discovered_on <= ?
+	{{ if not .FirstPage }}
 			  AND id > ?
-			  AND {{ .OrderOn }} {{ GTEorLTE(.Ascending) }} ?
+			  AND {{ .OrderOn }} {{ GTEorLTE .Ascending }} ?
 	{{ end }}
-		ORDER BY {{ .OrderOn }} {{ AscOrDesc(.Ascending) }}, id ASC
+		ORDER BY {{ .OrderOn }} {{ AscOrDesc .Ascending }}, id ASC
 		LIMIT ?;	
-	`, struct {
-		DoJoin    bool
-		FirstPage bool
-		OrderOn   string
-		Ascending bool
-	}{
+	`, queryTD{
 		DoJoin:    doJoin,    // if there is a query, do join
 		FirstPage: firstPage, // lastID != nil implies that lastOrderedValue != nil as well
 		OrderOn:   orderOn(orderBy),
@@ -236,7 +239,7 @@ func (db *sqlite3Database) QueryTorrents(
 		queryArgs = append(queryArgs, query)
 	}
 	queryArgs = append(queryArgs, epoch)
-	if firstPage {
+	if !firstPage {
 		queryArgs = append(queryArgs, lastID)
 		queryArgs = append(queryArgs, lastOrderedValue)
 	}
@@ -250,7 +253,7 @@ func (db *sqlite3Database) QueryTorrents(
 	var torrents []TorrentMetadata
 	for rows.Next() {
 		var torrent TorrentMetadata
-		if err = rows.Scan(&torrent.InfoHash, &torrent.Name, &torrent.Size, &torrent.DiscoveredOn, &torrent.NFiles); err != nil {
+		if err = rows.Scan(&torrent.ID, &torrent.InfoHash, &torrent.Name, &torrent.Size, &torrent.DiscoveredOn, &torrent.NFiles); err != nil {
 			return nil, err
 		}
 		torrents = append(torrents, torrent)
@@ -285,6 +288,7 @@ func orderOn(orderBy OrderingCriteria) string {
 func (db *sqlite3Database) GetTorrent(infoHash []byte) (*TorrentMetadata, error) {
 	rows, err := db.conn.Query(`
 		SELECT
+			id,
 			info_hash,
 			name,
 			total_size,
@@ -303,7 +307,7 @@ func (db *sqlite3Database) GetTorrent(infoHash []byte) (*TorrentMetadata, error)
 	}
 
 	var tm TorrentMetadata
-	if err = rows.Scan(&tm.InfoHash, &tm.Name, &tm.Size, &tm.DiscoveredOn, &tm.NFiles); err != nil {
+	if err = rows.Scan(&tm.ID, &tm.InfoHash, &tm.Name, &tm.Size, &tm.DiscoveredOn, &tm.NFiles); err != nil {
 		return nil, err
 	}
 
@@ -621,7 +625,7 @@ func (db *sqlite3Database) setupDatabase() error {
 	return nil
 }
 
-func executeTemplate(text string, data interface{}, funcs template.FuncMap) string {
+func executeTemplate(text string, data queryTD, funcs template.FuncMap) string {
 	t := template.Must(template.New("anon").Funcs(funcs).Parse(text))
 
 	var buf bytes.Buffer

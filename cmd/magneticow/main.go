@@ -15,11 +15,11 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/Wessie/appdirs"
 	"github.com/boramalper/magnetico/pkg/persistence"
 	"github.com/jessevdk/go-flags"
-	"path"
-	"github.com/Wessie/appdirs"
 	"net/url"
+	"path"
 )
 
 const N_TORRENTS = 20
@@ -46,9 +46,12 @@ type TorrentsTD struct {
 	Search          string
 	SubscriptionURL string
 	Torrents        []persistence.TorrentMetadata
-	Before          int64
-	After           int64
-	SortedBy        string
+	Epoch			int64
+	OrderBy	        string
+	Ascending		bool
+	Limit           uint
+	LastOrderedValue interface{}
+	LastID			uint
 	NextPageExists  bool
 }
 
@@ -98,7 +101,8 @@ func main() {
 	router.HandleFunc("/torrents", torrentsHandler)
 	router.HandleFunc("/torrents/{infohash:[a-z0-9]{40}}", torrentsInfohashHandler)
 	router.HandleFunc("/statistics", statisticsHandler)
-	router.PathPrefix("/static").Handler(http.FileServer(http.Dir("./static/")))
+
+	router.PathPrefix("/static").HandlerFunc(staticHandler)
 
 	router.HandleFunc("/feed", feedHandler)
 
@@ -173,7 +177,7 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	var lastOderedValue, lastID uint
 
 	var err error
-	
+
 	qOrderBy := queryValues.Get("orderBy")
 	switch qOrderBy {
 	case "size":
@@ -246,13 +250,16 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	//torrents[2].HasReadme = true
 
 	templates["torrents"].Execute(w, TorrentsTD{
-		Search:          "",
+		Search:          search,
 		SubscriptionURL: "borabora",
 		Torrents:        torrents,
-		Before:          torrents[len(torrents)-1].DiscoveredOn,
-		After:           torrents[0].DiscoveredOn,
-		SortedBy:        "anan",
-		NextPageExists:  true,
+		Epoch:			 epoch.Unix(),
+		OrderBy:         qOrderBy,
+		Ascending:       ascending,
+		Limit:			 limit,
+		LastOrderedValue: torrents[len(torrents)-1].DiscoveredOn,
+		LastID:			 torrents[len(torrents)-1].ID,
+		NextPageExists:  len(torrents) >= 20,
 	})
 
 }

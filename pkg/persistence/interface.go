@@ -75,6 +75,7 @@ type TorrentMetadata struct {
 	Size         uint64
 	DiscoveredOn int64
 	NFiles       uint
+	ID 			 uint
 }
 
 func MakeDatabase(dbURL *url.URL, logger *zap.Logger) (Database, error) {
