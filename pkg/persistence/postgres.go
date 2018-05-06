@@ -138,14 +138,23 @@ func (db *postgresDatabase) GetNumberOfTorrents() (uint, error) {
 	return n, nil
 }
 
-func (db *postgresDatabase) QueryTorrents(query string, discoveredOnBefore int64, orderBy orderingCriteria, ascending bool, page uint, pageSize uint) ([]TorrentMetadata, error) {
+func (db *postgresDatabase) QueryTorrents(
+	query string,
+	epoch int64,
+	orderBy orderingCriteria,
+	ascending bool,
+	limit uint,
+	lastOrderedValue *uint,
+	lastID *uint,
+) ([]TorrentMetadata, error) {
 	if query == "" && orderBy == ByRelevance {
 		return nil, fmt.Errorf("torrents cannot be ordered by \"relevance\" when the query is empty")
 	}
 
 	// TODO
+	var metadata []TorrentMetadata
 
-	return nil, nil
+	return metadata, nil
 }
 
 func (db *postgresDatabase) GetTorrent(infoHash []byte) (*TorrentMetadata, error) {
@@ -170,7 +179,7 @@ func (db *postgresDatabase) GetTorrent(infoHash []byte) (*TorrentMetadata, error
 	}
 
 	var tm TorrentMetadata
-	rows.Scan(&tm.InfoHash, &tm.Name, &tm.TotalSize, &tm.DiscoveredOn, &tm.NFiles)
+	rows.Scan(&tm.InfoHash, &tm.Name, &tm.Size, &tm.DiscoveredOn, &tm.NFiles)
 	if err = rows.Close(); err != nil {
 		return nil, err
 	}
@@ -198,9 +207,10 @@ func (db *postgresDatabase) GetFiles(infoHash []byte) ([]File, error) {
 	return files, nil
 }
 
-func (db *postgresDatabase) GetStatistics(n uint, granularity Granularity, to time.Time) (*Statistics, error) {
+func (db *postgresDatabase) GetStatistics(n uint, to string) (*Statistics, error) {
 	// TODO
-	return nil, nil
+	var stats *Statistics
+	return stats, nil
 }
 
 func (db *postgresDatabase) GetNewestTorrents(amount int, since int64) ([]TorrentMetadata, error) {
