@@ -8,17 +8,18 @@ import (
 
 	_ "github.com/lib/pq"
 	"unicode/utf8"
+	"net/url"
 )
 
 type postgresDatabase struct {
 	conn *sql.DB
 }
 
-func makePostgresDatabase(url_ string) (Database, error) {
+func makePostgresDatabase(url_ *url.URL) (Database, error) {
 	db := new(postgresDatabase)
 
 	var err error
-	db.conn, err = sql.Open("postgres", url_)
+	db.conn, err = sql.Open("postgres", url_.Path)
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %s", err.Error())
 	}
@@ -35,6 +36,10 @@ func makePostgresDatabase(url_ string) (Database, error) {
 	}
 
 	return db, nil
+}
+
+func (db *postgresDatabase) Engine() databaseEngine {
+	return Postgres
 }
 
 func (db *postgresDatabase) DoesTorrentExist(infoHash []byte) (bool, error) {
@@ -211,14 +216,6 @@ func (db *postgresDatabase) GetStatistics(n uint, to string) (*Statistics, error
 	// TODO
 	var stats *Statistics
 	return stats, nil
-}
-
-func (db *postgresDatabase) GetNewestTorrents(amount int, since int64) ([]TorrentMetadata, error) {
-	return nil, nil
-}
-
-func (db *postgresDatabase) Engine() databaseEngine {
-	return Postgres
 }
 
 func (db *postgresDatabase) setupDatabase() error {
