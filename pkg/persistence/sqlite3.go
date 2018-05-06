@@ -347,10 +347,92 @@ func (db *sqlite3Database) GetStatistics(n uint, from string) (*Statistics, erro
 	if err != nil {
 		return nil, fmt.Errorf("parsing @from error: %s", err.Error())
 	}
+
+	var interval time.Duration
+
+	switch granularity {
+	case Hour:
+		interval, err = time.ParseDuration("1h")
+		if err != nil {
+			return nil, err
+		}
+	case Day:
+		interval, err = time.ParseDuration("24h")
+		if err != nil {
+			return nil, err
+		}
+	case Week:
+		interval, err = time.ParseDuration("168h")
+		if err != nil {
+			return nil, err
+		}
+	case Month:
+		interval, err = time.ParseDuration("720h")
+		if err != nil {
+			return nil, err
+		}
+	case Year:
+		interval, err = time.ParseDuration("8760h")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var stats Statistics
+	stats.N = n
+
+	for i := uint(0); i < n; i++ {
+		until_time := from_time.Add(interval)
+		var nTorrents, nFiles, totalSize uint64
+
+		row := db.conn.QueryRow(`
+			SELECT COUNT(id)
+			FROM torrents
+			WHERE discovered_on > ?
+			AND discovered_on <= ?
+			`,
+			from_time.Unix(), until_time.Unix())
+		err = row.Scan(&nTorrents)
+		if err != nil {
+			return nil, err
+		}
+		stats.NTorrents = append(stats.NTorrents, nTorrents)
+
+		if nTorrents != 0 {
+			err = db.conn.QueryRow(`
+			SELECT COUNT(f.id)
+			FROM files f
+			INNER JOIN torrents t
+			ON f.torrent_id = t.id
+			WHERE t.discovered_on > ?
+			AND t.discovered_on <= ?
+			`, from_time.Unix(), until_time.Unix()).Scan(&nFiles)
+			if err != nil {
+				return nil, err
+			}
+			stats.NFiles = append(stats.NFiles, nFiles)
+
+			err = db.conn.QueryRow(`
+			SELECT SUM(total_size)
+			FROM torrents
+			WHERE discovered_on > ?
+			AND discovered_on <= ? 
+			`, from_time.Unix(), until_time.Unix()).Scan(&totalSize)
+			if err != nil {
+				return nil, err
+			}
+			stats.TotalSize = append(stats.TotalSize, totalSize)
+		} else {
+			stats.NFiles = append(stats.NFiles, 0)
+			stats.TotalSize = append(stats.TotalSize, 0)
+		}
+		from_time = &until_time
+	}
+
 	zap.L().Debug("Parsed Date for statistics", zap.Time("from_time", *from_time), zap.Int("granularity", int(granularity)))
 	// TODO
 
-	return nil, nil
+	return &stats, nil
 }
 
 func (db *sqlite3Database) setupDatabase() error {

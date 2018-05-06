@@ -119,7 +119,8 @@ func TestSqlite3Database_GetStatistics(t *testing.T) {
 
 	dataPoints := uint(2)
 
-	stats, err := db.GetStatistics(dataPoints, "2018")
+	// start is from 31.12.2016
+	stats, err := db.GetStatistics(dataPoints, "2016")
 	checkErr(err, t)
 
 	if stats.N != dataPoints {
