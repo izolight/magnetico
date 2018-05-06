@@ -153,7 +153,7 @@ func (db *postgresDatabase) GetNumberOfTorrents() (uint, error) {
 func (db *postgresDatabase) QueryTorrents(
 	query string,
 	epoch int64,
-	orderBy orderingCriteria,
+	orderBy OrderingCriteria,
 	ascending bool,
 	limit uint,
 	lastOrderedValue *uint,

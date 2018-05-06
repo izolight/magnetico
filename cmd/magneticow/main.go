@@ -9,17 +9,17 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unsafe"
 
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"html/template"
-	"net/http"
-	"os"
 
 	"github.com/boramalper/magnetico/pkg/persistence"
+	"github.com/jessevdk/go-flags"
+	"path"
+	"github.com/Wessie/appdirs"
+	"net/url"
 )
 
 const N_TORRENTS = 20
@@ -33,7 +33,7 @@ type cmdFlags struct {
 }
 
 type opFlags struct {
-	DatabaseURL string
+	DatabaseURL *url.URL
 	Verbosity   int
 }
 
@@ -162,49 +162,82 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	queryValues := r.URL.Query()
 
-	// Parses `before` and `after` parameters in the URL query following the conditions below:
-	// * `before` and `after` cannot be both supplied at the same time.
-	// * `before` -if supplied- cannot be less than or equal to zero.
-	// * `after` -if supplied- cannot be greater than the current Unix time.
-	// * if `before` is not supplied, it is set to the current Unix time.
-	qBefore, qAfter := (int64)(-1), (int64)(-1)
+	search := queryValues.Get("search")
+	epoch := time.Now()
+	orderBy := persistence.ByRelevance
+	if search == "" {
+		orderBy = persistence.ByDiscoveredOn
+	}
+	ascending := false
+	limit := uint(20)
+	var lastOderedValue, lastID uint
+
 	var err error
-	if queryValues.Get("before") != "" {
-		qBefore, err = strconv.ParseInt(queryValues.Get("before"), 10, 64)
+	
+	qOrderBy := queryValues.Get("orderBy")
+	switch qOrderBy {
+	case "size":
+		orderBy = persistence.BySize
+	case "discovered":
+		orderBy = persistence.ByDiscoveredOn
+	case "files":
+		orderBy = persistence.ByNFiles
+	case "seeders":
+		orderBy = persistence.ByNSeeders
+	case "leechers":
+		orderBy = persistence.ByNLeechers
+	}
+
+	if queryValues.Get("ascending") != "" {
+		ascending = true
+	}
+
+	qLimit := queryValues.Get("limit")
+	if qLimit != "" {
+		l, err := strconv.ParseUint(qLimit, 10, 64)
 		if err != nil {
 			panic(err.Error())
 		}
-		if qBefore <= 0 {
-			panic("before parameter is less than or equal to zero!")
-		}
-	} else if queryValues.Get("after") != "" {
-		if qBefore != -1 {
-			panic("both before and after supplied")
-		}
-		qAfter, err = strconv.ParseInt(queryValues.Get("after"), 10, 64)
+		limit = uint(l)
+	}
+
+	if queryValues.Get("epoch") != "" {
+		qEpoch, err := strconv.ParseInt(queryValues.Get("epoch"), 10, 64)
 		if err != nil {
 			panic(err.Error())
 		}
-		if qAfter > time.Now().Unix() {
-			panic("after parameter is greater than the current Unix time!")
+		epoch = time.Unix(qEpoch, 0)
+
+		qLastOrderedValue := queryValues.Get("lastOrderedValue")
+		qLastID := queryValues.Get("lastID")
+		if qLastOrderedValue != "" && qLastID != "" {
+			lo, err := strconv.ParseUint(qLastOrderedValue, 10, 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			lastOderedValue = uint(lo)
+
+			li, err := strconv.ParseUint(qLastID, 10, 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			lastID = uint(li)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("when specifying epoch, need to supply lastOrderedValue and lastID as well"))
 		}
-	} else {
-		qBefore = time.Now().Unix()
 	}
 
 	var torrents []persistence.TorrentMetadata
-	if qBefore != -1 {
-		torrents, err = database.GetNewestTorrents(N_TORRENTS, qBefore)
-	} else {
-		torrents, err = database.QueryTorrents(
-			queryValues.Get("search"),
-			qAfter,
-			persistence.ByDiscoveredOn,
-			true,
-			1,
-			N_TORRENTS,
-		)
-	}
+	torrents, err = database.QueryTorrents(
+		search,
+		epoch.Unix(),
+		orderBy,
+		ascending,
+		limit,
+		&lastOderedValue,
+		&lastID,
+	)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -222,63 +255,6 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 		NextPageExists:  true,
 	})
 
-}
-
-func newestTorrentsHandler(w http.ResponseWriter, r *http.Request) {
-	queryValues := r.URL.Query()
-
-	qBefore, qAfter := (int64)(-1), (int64)(-1)
-	var err error
-	if queryValues.Get("before") != "" {
-		qBefore, err = strconv.ParseInt(queryValues.Get("before"), 10, 64)
-		if err != nil {
-			panic(err.Error())
-		}
-	} else if queryValues.Get("after") != "" {
-		if qBefore != -1 {
-			panic("both before and after supplied")
-		}
-		qAfter, err = strconv.ParseInt(queryValues.Get("after"), 10, 64)
-		if err != nil {
-			panic(err.Error())
-		}
-	} else {
-		qBefore = time.Now().Unix()
-	}
-
-	var torrents []persistence.TorrentMetadata
-	if qBefore != -1 {
-		torrents, err = database.QueryTorrents(
-			queryValues.Get("search"),
-			qBefore,
-			persistence.ByDiscoveredOn,
-			true,
-			1,
-			N_TORRENTS,
-		)
-	} else {
-		torrents, err = database.QueryTorrents(
-			queryValues.Get("search"),
-			qAfter,
-			persistence.ByDiscoveredOn,
-			true,
-			1,
-			N_TORRENTS,
-		)
-	}
-	if err != nil {
-		panic(err.Error())
-	}
-
-	templates["torrents"].Execute(w, TorrentsTD{
-		Search:          "",
-		SubscriptionURL: "borabora",
-		Torrents:        torrents,
-		Before:          torrents[len(torrents)-1].DiscoveredOn,
-		After:           torrents[0].DiscoveredOn,
-		SortedBy:        "anan",
-		NextPageExists:  true,
-	})
 }
 
 func torrentsInfohashHandler(w http.ResponseWriter, r *http.Request) {
@@ -339,12 +315,14 @@ func parseFlags() (*opFlags, error) {
 	}
 
 	if cmdF.DatabaseURL == "" {
-		opF.DatabaseURL = "sqlite3://" + path.Join(
+		cmdF.DatabaseURL = "sqlite3://" + path.Join(
 			appdirs.UserDataDir("magneticod", "", "", false),
 			"database.sqlite3",
 		)
-	} else {
-		opF.DatabaseURL = cmdF.DatabaseURL
+	}
+	opF.DatabaseURL, err = url.Parse(cmdF.DatabaseURL)
+	if err != nil {
+		zap.L().Fatal("Failed to parse DB URL", zap.Error(err))
 	}
 
 	opF.Verbosity = len(cmdF.Verbose)

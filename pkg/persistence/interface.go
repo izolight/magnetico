@@ -24,7 +24,7 @@ type Database interface {
 	QueryTorrents(
 		query string,
 		epoch int64,
-		orderBy orderingCriteria,
+		orderBy OrderingCriteria,
 		ascending bool,
 		limit uint,
 		lastOrderedValue *uint,
@@ -37,10 +37,10 @@ type Database interface {
 	GetStatistics(n uint, to string) (*Statistics, error)
 }
 
-type orderingCriteria uint8
+type OrderingCriteria uint8
 
 const (
-	ByRelevance orderingCriteria = iota
+	ByRelevance OrderingCriteria = iota
 	BySize
 	ByDiscoveredOn
 	ByNFiles
