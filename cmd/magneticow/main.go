@@ -133,11 +133,11 @@ func main() {
 	}
 
 	templates = make(map[string]*template.Template)
-	templates["feed"] = template.Must(template.New("feed").ParseFiles("templates/feed.xml"))
-	templates["homepage"] = template.Must(template.New("homepage").ParseFiles("templates/homepage.html"))
-	templates["statistics"] = template.Must(template.New("statistics").ParseFiles("templates/statistics.html"))
-	templates["torrent"] = template.Must(template.New("torrent").Funcs(templateFunctions).ParseFiles("templates/torrent.html"))
-	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).ParseFiles("templates/torrents.html"))
+	templates["feed"] = template.Must(template.New("feed").Parse(string(mustAsset("templates/feed.xml"))))
+	templates["homepage"] = template.Must(template.New("homepage").Parse(string(mustAsset("templates/homepage.html"))))
+	templates["statistics"] = template.Must(template.New("statistics").Parse(string(mustAsset("templates/statistics.html"))))
+	templates["torrent"] = template.Must(template.New("torrent").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrent.html"))))
+	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrents.html"))))
 
 	database, err = persistence.MakeDatabase(opFlags.DatabaseURL, logger)
 	if err != nil {
