@@ -20,7 +20,7 @@ func makePostgresDatabase(url_ *url.URL) (Database, error) {
 	db := new(postgresDatabase)
 
 	var err error
-	db.conn, err = sql.Open("postgres", url_.Path)
+	db.conn, err = sql.Open("postgres", url_.String())
 	if err != nil {
 		return nil, fmt.Errorf("sql.Open: %s", err.Error())
 	}
