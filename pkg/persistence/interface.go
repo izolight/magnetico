@@ -77,19 +77,14 @@ type TorrentMetadata struct {
 	NFiles       uint
 }
 
-func MakeDatabase(rawURL string, logger *zap.Logger) (Database, error) {
+func MakeDatabase(dbURL *url.URL, logger *zap.Logger) (Database, error) {
 	if logger != nil {
 		zap.ReplaceGlobals(logger)
 	}
 
-	url_, err := url.Parse(rawURL)
-	if err != nil {
-		return nil, err
-	}
-
-	switch url_.Scheme {
+	switch dbURL.Scheme {
 	case "sqlite3":
-		return makeSqlite3Database(url_)
+		return makeSqlite3Database(dbURL)
 
 	case "postgresql":
 		// we can pass the raw url like this
