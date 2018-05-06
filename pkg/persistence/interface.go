@@ -89,7 +89,7 @@ func MakeDatabase(dbURL *url.URL, logger *zap.Logger) (Database, error) {
 	case "postgresql":
 		// we can pass the raw url like this
 		// postgresql://user:secret@host:1234/dbname
-		return makePostgresDatabase(rawURL)
+		return makePostgresDatabase(dbURL)
 		return nil, fmt.Errorf("postgresql is not yet supported!")
 
 	case "mysql":
