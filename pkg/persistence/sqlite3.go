@@ -315,7 +315,13 @@ func (db *sqlite3Database) GetTorrent(infoHash []byte) (*TorrentMetadata, error)
 }
 
 func (db *sqlite3Database) GetFiles(infoHash []byte) ([]File, error) {
-	rows, err := db.conn.Query("SELECT size, path FROM files WHERE torrent_id = ?;", infoHash)
+	rows, err := db.conn.Query(`
+		SELECT size, path 
+		FROM files
+		INNER JOIN torrents
+		ON files.torrent_id = torrents.id
+		WHERE torrents.info_hash = ?;
+		`, infoHash)
 	if err != nil {
 		return nil, err
 	}
