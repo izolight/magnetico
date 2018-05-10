@@ -205,8 +205,10 @@ func (db *sqlite3Database) QueryTorrents(
 	{{ end }}
 		WHERE discovered_on <= ?
 	{{ if not .FirstPage }}
-			  AND id > ?
-			  AND {{ .OrderOn }} {{ GTEorLTE .Ascending }} ?
+			  AND (
+				(id > ? AND  {{ .OrderOn }} = ?) OR
+			  	({{ .OrderOn }} {{ GTEorLTE .Ascending }} ?)
+				)
 	{{ end }}
 		ORDER BY {{ .OrderOn }} {{ AscOrDesc .Ascending }}, id ASC
 		LIMIT ?;	
@@ -241,6 +243,7 @@ func (db *sqlite3Database) QueryTorrents(
 	queryArgs = append(queryArgs, epoch)
 	if !firstPage {
 		queryArgs = append(queryArgs, lastID)
+		queryArgs = append(queryArgs, lastOrderedValue)
 		queryArgs = append(queryArgs, lastOrderedValue)
 	}
 	queryArgs = append(queryArgs, limit)
