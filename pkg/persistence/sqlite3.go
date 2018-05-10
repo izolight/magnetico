@@ -219,9 +219,9 @@ func (db *sqlite3Database) QueryTorrents(
 		"GTEorLTE": func(ascending bool) string {
 			// TODO: or maybe vice versa idk
 			if ascending {
-				return "<"
-			} else {
 				return ">"
+			} else {
+				return "<"
 			}
 		},
 		"AscOrDesc": func(ascending bool) string {
