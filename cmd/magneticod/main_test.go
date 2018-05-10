@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Wessie/appdirs"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestAppdirs(t *testing.T) {

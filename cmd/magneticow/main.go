@@ -43,16 +43,16 @@ type HomepageTD struct {
 }
 
 type TorrentsTD struct {
-	Search          string
-	SubscriptionURL string
-	Torrents        []persistence.TorrentMetadata
-	Epoch			int64
-	OrderBy	        string
-	Ascending		bool
-	Limit           uint
+	Search           string
+	SubscriptionURL  string
+	Torrents         []persistence.TorrentMetadata
+	Epoch            int64
+	OrderBy          string
+	Ascending        bool
+	Limit            uint
 	LastOrderedValue interface{}
-	LastID			uint
-	NextPageExists  bool
+	LastID           uint
+	NextPageExists   bool
 }
 
 type TorrentTD struct {
@@ -250,16 +250,16 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	//torrents[2].HasReadme = true
 
 	templates["torrents"].Execute(w, TorrentsTD{
-		Search:          search,
-		SubscriptionURL: "borabora",
-		Torrents:        torrents,
-		Epoch:			 epoch.Unix(),
-		OrderBy:         qOrderBy,
-		Ascending:       ascending,
-		Limit:			 limit,
+		Search:           search,
+		SubscriptionURL:  "borabora",
+		Torrents:         torrents,
+		Epoch:            epoch.Unix(),
+		OrderBy:          qOrderBy,
+		Ascending:        ascending,
+		Limit:            limit,
 		LastOrderedValue: torrents[len(torrents)-1].DiscoveredOn,
-		LastID:			 torrents[len(torrents)-1].ID,
-		NextPageExists:  len(torrents) >= 20,
+		LastID:           torrents[len(torrents)-1].ID,
+		NextPageExists:   len(torrents) >= 20,
 	})
 
 }

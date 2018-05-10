@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
+	"encoding/hex"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
 	"go.uber.org/zap"
-	"encoding/hex"
 )
 
 type TrawlingResult struct {

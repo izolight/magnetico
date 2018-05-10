@@ -2,14 +2,14 @@ package persistence
 
 import (
 	"database/sql"
-	"time"
 	"fmt"
 	"go.uber.org/zap"
+	"time"
 
-	_ "github.com/lib/pq"
-	"unicode/utf8"
-	"net/url"
 	"github.com/lib/pq"
+	_ "github.com/lib/pq"
+	"net/url"
+	"unicode/utf8"
 )
 
 type postgresDatabase struct {
@@ -105,7 +105,7 @@ func (db *postgresDatabase) AddNewTorrent(infoHash []byte, name string, files []
 	for _, file := range files {
 		_, err := stmt.Exec(lastInsertId, file.Size, fixUTF8Encoding(file.Path))
 		if err != nil {
-			return fmt.Errorf( "couldn't insert file with path %s and bytes % x %s", file.Path, file.Path, err.Error())
+			return fmt.Errorf("couldn't insert file with path %s and bytes % x %s", file.Path, file.Path, err.Error())
 		}
 	}
 	_, err = stmt.Exec()

@@ -1,12 +1,12 @@
 package persistence
 
 import (
-	"testing"
 	"encoding/hex"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
 	"net/url"
+	"os"
+	"testing"
 	"time"
 )
 
@@ -156,7 +156,7 @@ func setupTest(t *testing.T) (func(t *testing.T), Database) {
 	db, err := MakeDatabase(dbUrl, logger)
 	checkErr(err, t)
 
-	return func(t * testing.T) {
+	return func(t *testing.T) {
 		os.Remove(dbUrl.Path)
 		t.Log("teardown db")
 	}, db
