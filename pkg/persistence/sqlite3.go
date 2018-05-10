@@ -173,18 +173,18 @@ func (db *sqlite3Database) QueryTorrents(
 	orderBy OrderingCriteria,
 	ascending bool,
 	limit uint,
-	lastOrderedValue *uint,
-	lastID *uint,
+	lastOrderedValue uint,
+	lastID uint,
 ) ([]TorrentMetadata, error) {
 	if query == "" && orderBy == ByRelevance {
 		return nil, fmt.Errorf("torrents cannot be ordered by relevance when the query is empty")
 	}
-	if (lastOrderedValue == nil) != (lastID == nil) {
+	if (lastOrderedValue == 0) != (lastID == 0) {
 		return nil, fmt.Errorf("lastOrderedValue and lastID should be supplied together, if supplied")
 	}
 
 	doJoin := query != ""
-	firstPage := lastID != nil
+	firstPage := lastID == 0
 
 	// executeTemplate is used to prepare the SQL query, WITH PLACEHOLDERS FOR USER INPUT.
 	sqlQuery := executeTemplate(`

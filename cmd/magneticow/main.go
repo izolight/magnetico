@@ -239,8 +239,8 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 		orderBy,
 		ascending,
 		limit,
-		&lastOderedValue,
-		&lastID,
+		lastOderedValue,
+		lastID,
 	)
 	if err != nil {
 		panic(err.Error())
