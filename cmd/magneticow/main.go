@@ -172,9 +172,6 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	search := queryValues.Get("search")
 	epoch := time.Now()
 	orderBy := persistence.ByRelevance
-	if search == "" {
-		orderBy = persistence.ByDiscoveredOn
-	}
 	ascending := false
 	limit := uint(20)
 	var lastOderedValue, lastID uint
@@ -193,6 +190,10 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 		orderBy = persistence.ByNSeeders
 	case "leechers":
 		orderBy = persistence.ByNLeechers
+	default:
+		if search == "" {
+			orderBy = persistence.ByDiscoveredOn
+		}
 	}
 
 	if queryValues.Get("ascending") != "" {
