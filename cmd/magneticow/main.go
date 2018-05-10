@@ -20,6 +20,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"net/url"
 	"path"
+	"net"
 )
 
 const N_TORRENTS = 20
@@ -29,11 +30,13 @@ var database persistence.Database
 
 type cmdFlags struct {
 	DatabaseURL string `long:"database" description:"URL of the database."`
+	BindAddr    string `short:"b" long:"bind" description:"Address that the WebUI should listen on." env:"BIND_ADDR" env-delim:"," default:"0.0.0.0:8080"`
 	Verbose     []bool `short:"v" long:"verbose" description:"Increases verbosity."`
 }
 
 type opFlags struct {
 	DatabaseURL *url.URL
+	BindAddr	string
 	Verbosity   int
 }
 
@@ -149,7 +152,7 @@ func main() {
 	}
 
 	zap.L().Info("magneticow is ready to serve!")
-	http.ListenAndServe(":8080", router)
+	http.ListenAndServe(opFlags.BindAddr, router)
 }
 
 // DONE
@@ -331,6 +334,12 @@ func parseFlags() (*opFlags, error) {
 	if err != nil {
 		zap.L().Fatal("Failed to parse DB URL", zap.Error(err))
 	}
+
+	_, err = net.ResolveTCPAddr("tcp", cmdF.BindAddr)
+	if err != nil {
+		zap.L().Fatal("Failed to parse Address", zap.Error(err))
+	}
+	opF.BindAddr = cmdF.BindAddr
 
 	opF.Verbosity = len(cmdF.Verbose)
 
