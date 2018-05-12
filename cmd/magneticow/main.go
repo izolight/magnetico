@@ -63,6 +63,8 @@ type TorrentsTD struct {
 }
 
 type TorrentTD struct {
+	Torrent 	persistence.TorrentMetadata
+	Files		[]persistence.File
 }
 
 type FeedTD struct {
@@ -300,8 +302,15 @@ func torrentsInfohashHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
+	files, err := database.GetFiles(infoHash)
+	if err != nil {
+		panic(err.Error())
+	}
 
-	templates["torrent"].Execute(w, torrent)
+	templates["torrent"].Execute(w, TorrentTD{
+		Torrent: *torrent,
+		Files: files,
+	})
 }
 
 func statisticsHandler(w http.ResponseWriter, r *http.Request) {

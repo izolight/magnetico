@@ -59,7 +59,7 @@
                 <td><a href="magnet:?xt=urn:btih:{{ bytesToHex .InfoHash }}&dn={{ .Name }}">
                     <img src="static/assets/magnet.gif" alt="Magnet link"
                          title="Download this torrent using magnet" /></a></td>
-                <td><a href="/torrents/{{ bytesToHex .InfoHash }}/{{ .Name }}">{{ .Name }}</a></td>
+                <td><a href="/torrents/{{ bytesToHex .InfoHash }}">{{ .Name }}</a></td>
                 <td>{{ humanizeSize .Size }}</td>
                 <td>{{ unixTimeToYearMonthDay .DiscoveredOn }}</td>
             </tr>
