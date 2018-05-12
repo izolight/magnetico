@@ -35,7 +35,7 @@ type Database interface {
 	// nil, nil if the torrent does not exist in the database.
 	GetTorrent(infoHash []byte) (*TorrentMetadata, error)
 	GetFiles(infoHash []byte) ([]File, error)
-	GetStatistics(n uint, to string) (*Statistics, error)
+	GetStatistics(n uint, from string) (*Statistics, error)
 }
 
 type OrderingCriteria uint8

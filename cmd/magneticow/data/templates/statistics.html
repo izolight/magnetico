@@ -3,25 +3,35 @@
 <head>
     <meta charset="utf-8">
     <title>Statistics - magneticow</title>
-    <link rel="stylesheet" href="static/styles/reset.css">
-    <link rel="stylesheet" href="static/styles/essential.css">
-    <link rel="stylesheet" href="static/styles/statistics.css">
-    <script defer src="static/scripts/plotly-v1.26.1.min.js"></script>
-    <script defer src="static/scripts/statistics.js"></script>
+    <link rel="stylesheet" href="/static/styles/reset.css">
+    <link rel="stylesheet" href="/static/styles/essential.css">
+    <link rel="stylesheet" href="/static/styles/statistics.css">
+    <script defer src="/static/scripts/plotly-v1.26.1.min.js"></script>
+    <script defer src="/static/scripts/statistics.js"></script>
 </head>
 <body>
 <header>
     <script>
-        var discoveryRateData = [{
-            x: {{ .dates }},
-            y: {{ .amounts }},
+        var torrentsData = {
+            x: {{ .Dates }},
+            y: {{ .Stats.NTorrents }},
             mode: "lines+markers"
-        }];
+        };
+        /*        var filesData = {
+                    x: {{ .Dates }},
+            y: {{ .Stats.NFiles }},
+            mode: "lines+markers"
+        };
+        var sizeData = {
+            x: {{ .Dates }},
+            y: {{ .Stats.TotalSize }},
+            mode: "lines+markers"
+        };*/
+        var discoveryRateData = [torrentsData];
     </script>
 
     <div><a href="/"><b>magnetico<sup>w</sup></b></a>&#8203;<sub>(pre-alpha)</sub></div>
 </header>
-
 <main>
     <div id="discoveryRateGraph"></div>
 </main>

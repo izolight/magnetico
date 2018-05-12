@@ -71,6 +71,8 @@ type FeedTD struct {
 }
 
 type StatisticsTD struct {
+	Stats persistence.Statistics
+	Dates []string
 }
 
 func main() {
@@ -314,7 +316,26 @@ func torrentsInfohashHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statisticsHandler(w http.ResponseWriter, r *http.Request) {
+	interval, err := time.ParseDuration("24h")
+	if err != nil {
+		panic(err.Error())
+	}
+	from := time.Now().Add(-30*interval)
 
+	stats, err := database.GetStatistics(30, from.Format("2006-01-02"))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var dates []string
+	for i := 0; i < 30; i++ {
+		from = from.Add(interval)
+		dates = append(dates, from.Format("2006-01-02"))
+	}
+	templates["statistics"].Execute(w, StatisticsTD{
+		Stats: *stats,
+		Dates: dates,
+	})
 }
 
 func feedHandler(w http.ResponseWriter, r *http.Request) {
