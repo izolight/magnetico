@@ -156,8 +156,8 @@ func (db *postgresDatabase) QueryTorrents(
 	orderBy OrderingCriteria,
 	ascending bool,
 	limit uint,
-	lastOrderedValue uint,
-	lastID uint,
+	lastOrderedValue uint64,
+	lastID uint64,
 ) ([]TorrentMetadata, error) {
 	if query == "" && orderBy == ByRelevance {
 		return nil, fmt.Errorf("torrents cannot be ordered by \"relevance\" when the query is empty")

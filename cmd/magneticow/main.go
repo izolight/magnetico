@@ -53,8 +53,12 @@ type TorrentsTD struct {
 	OrderBy          string
 	Ascending        bool
 	Limit            uint
+	PreviousOrderedValue interface{}
 	LastOrderedValue interface{}
-	LastID           uint
+	FirstID			 uint64
+	PreviousID		 uint64
+	LastID           uint64
+	IsFirstPage		 bool
 	NextPageExists   bool
 }
 
@@ -174,7 +178,9 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	orderBy := persistence.ByRelevance
 	ascending := false
 	limit := uint(20)
-	var lastOderedValue, lastID uint
+
+	var previousOrderedValue, lastOrderedValue uint64
+	var firstID, previousID, lastID uint64
 
 	var err error
 
@@ -209,6 +215,8 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 		limit = uint(l)
 	}
 
+	forward := true
+
 	if queryValues.Get("epoch") != "" {
 		qEpoch, err := strconv.ParseInt(queryValues.Get("epoch"), 10, 64)
 		if err != nil {
@@ -218,18 +226,28 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 
 		qLastOrderedValue := queryValues.Get("lastOrderedValue")
 		qLastID := queryValues.Get("lastID")
-		if qLastOrderedValue != "" && qLastID != "" {
-			lo, err := strconv.ParseUint(qLastOrderedValue, 10, 64)
-			if err != nil {
-				panic(err.Error())
-			}
-			lastOderedValue = uint(lo)
+		qPreviousOrderedValue := queryValues.Get("previousOrderedValue")
+		qPreviousID := queryValues.Get("previousID")
 
-			li, err := strconv.ParseUint(qLastID, 10, 64)
+		if qLastOrderedValue != "" && qLastID != "" {
+			lastOrderedValue, err = strconv.ParseUint(qLastOrderedValue, 10, 64)
 			if err != nil {
 				panic(err.Error())
 			}
-			lastID = uint(li)
+			lastID, err = strconv.ParseUint(qLastID, 10, 64)
+			if err != nil {
+				panic(err.Error())
+			}
+		} else if qPreviousOrderedValue != "" && qPreviousID != "" {
+			previousOrderedValue, err = strconv.ParseUint(qPreviousOrderedValue, 10, 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			previousID, err = strconv.ParseUint(qPreviousID, 10, 64)
+			if err != nil {
+				panic(err.Error())
+			}
+			forward = false
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("when specifying epoch, need to supply lastOrderedValue and lastID as well"))
@@ -237,17 +255,38 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var torrents []persistence.TorrentMetadata
-	torrents, err = database.QueryTorrents(
-		search,
-		epoch.Unix(),
-		orderBy,
-		ascending,
-		limit,
-		lastOderedValue,
-		lastID,
-	)
-	if err != nil {
-		panic(err.Error())
+	if forward {
+		torrents, err = database.QueryTorrents(
+			search,
+			epoch.Unix(),
+			orderBy,
+			ascending,
+			limit,
+			lastOrderedValue,
+			lastID,
+		)
+		if err != nil {
+			panic(err.Error())
+		}
+	} else {
+		torrents, err = database.QueryTorrents(
+			search,
+			epoch.Unix(),
+			orderBy,
+			ascending,
+			limit,
+			previousOrderedValue,
+			previousID,
+		)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	if queryValues.Get("firstID") != "" {
+		firstID, err = strconv.ParseUint(queryValues.Get("firstID"),10, 64)
+	} else {
+		firstID = uint64(torrents[0].ID)
 	}
 
 	// TODO: for testing, REMOVE
@@ -261,9 +300,13 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 		OrderBy:          qOrderBy,
 		Ascending:        ascending,
 		Limit:            limit,
+		PreviousOrderedValue: torrents[0].DiscoveredOn,
 		LastOrderedValue: torrents[len(torrents)-1].DiscoveredOn,
-		LastID:           torrents[len(torrents)-1].ID,
+		FirstID:          firstID,
+		PreviousID:       uint64(torrents[0].ID),
+		LastID:           uint64(torrents[len(torrents)-1].ID),
 		NextPageExists:   len(torrents) >= 20,
+		IsFirstPage: 	  firstID == uint64(torrents[0].ID),
 	})
 
 }

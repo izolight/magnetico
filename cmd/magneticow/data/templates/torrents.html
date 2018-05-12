@@ -70,7 +70,7 @@
 <footer>
 
     <form action="/torrents" method="get">
-        <button {{ if .NextPageExists }}disabled{{ end }}>Previous</button>
+        <button {{ if .IsFirstPage }}disabled{{ end }}>Previous</button>
         <input type="text" name="search" value="{{ .Search }}" hidden>
         <input type="number" name="epoch" value="{{ .Epoch }}" hidden>
         {{ if .OrderBy }}
@@ -80,8 +80,9 @@
         <input type="text" name="ascending" value="{{ .Ascending }}" hidden>
         {{ end}}
         <input type="number" name="limit" value="{{ .Limit }}" hidden>
-        <input type="text" name="lastOrderedValue" value="{{ .LastOrderedValue }}" hidden>
-        <input type="text" name="lastID" value="{{ .LastID }}" hidden>
+        <input type="text" name="previousOrderedValue" value="{{ .PreviousOrderedValue }}" hidden>
+        <input type="text" name="previousID" value="{{ .PreviousID }}" hidden>
+        <input type="text" name="firstID" value="{{ .FirstID }}" hidden>
     </form>
     <form action="/torrents" method="get">
         <button {{ if not .NextPageExists }}disabled{{ end }}>Next</button>
@@ -96,6 +97,7 @@
         <input type="number" name="limit" value="{{ .Limit }}" hidden>
         <input type="text" name="lastOrderedValue" value="{{ .LastOrderedValue }}" hidden>
         <input type="text" name="lastID" value="{{ .LastID }}" hidden>
+        <input type="text" name="firstID" value="{{ .FirstID }}" hidden>
     </form>
 </footer>
 </body>
