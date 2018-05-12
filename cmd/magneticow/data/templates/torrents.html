@@ -80,9 +80,10 @@
         <input type="text" name="ascending" value="{{ .Ascending }}" hidden>
         {{ end}}
         <input type="number" name="limit" value="{{ .Limit }}" hidden>
-        <input type="text" name="previousOrderedValue" value="{{ .PreviousOrderedValue }}" hidden>
-        <input type="text" name="previousID" value="{{ .PreviousID }}" hidden>
-        <input type="text" name="firstID" value="{{ .FirstID }}" hidden>
+        <input type="text" name="lastOrderedValue" value="{{ .FirstOrderedValue }}" hidden>
+        <input type="text" name="lastID" value="{{ .FirstID }}" hidden>
+        <input type="text" name="startID" value="{{ .StartID }}" hidden>
+        <input type="text" name="backward" value="true" hidden>
     </form>
     <form action="/torrents" method="get">
         <button {{ if not .NextPageExists }}disabled{{ end }}>Next</button>
@@ -97,7 +98,7 @@
         <input type="number" name="limit" value="{{ .Limit }}" hidden>
         <input type="text" name="lastOrderedValue" value="{{ .LastOrderedValue }}" hidden>
         <input type="text" name="lastID" value="{{ .LastID }}" hidden>
-        <input type="text" name="firstID" value="{{ .FirstID }}" hidden>
+        <input type="text" name="startID" value="{{ .StartID }}" hidden>
     </form>
 </footer>
 </body>

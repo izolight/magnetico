@@ -29,6 +29,7 @@ type Database interface {
 		limit uint,
 		lastOrderedValue uint64,
 		lastID uint64,
+		backward bool,
 	) ([]TorrentMetadata, error)
 	// GetTorrents returns the TorrentExtMetadata for the torrent of the given InfoHash. Will return
 	// nil, nil if the torrent does not exist in the database.

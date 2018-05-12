@@ -165,6 +165,8 @@ type queryTD struct {
 	FirstPage bool
 	OrderOn   string
 	Ascending bool
+	GTELTE	  bool
+	Forward   bool
 }
 
 func (db *sqlite3Database) QueryTorrents(
@@ -175,6 +177,7 @@ func (db *sqlite3Database) QueryTorrents(
 	limit uint,
 	lastOrderedValue uint64,
 	lastID uint64,
+	backward bool,
 ) ([]TorrentMetadata, error) {
 	if query == "" && orderBy == ByRelevance {
 		return nil, fmt.Errorf("torrents cannot be ordered by relevance when the query is empty")
@@ -205,18 +208,27 @@ func (db *sqlite3Database) QueryTorrents(
 	{{ end }}
 		WHERE discovered_on <= ?
 	{{ if not .FirstPage }}
+		{{ if .Forward }}
 			  AND (
 				(id > ? AND  {{ .OrderOn }} = ?) OR
-			  	({{ .OrderOn }} {{ GTEorLTE .Ascending }} ?)
+			  	({{ .OrderOn }} {{ GTEorLTE .GTELTE }} ?)
 				)
+		{{ else }}
+			AND (
+				(id < ? AND  {{ .OrderOn }} = ?) OR
+			  	({{ .OrderOn }} {{ GTEorLTE .GTELTE }} ?)
+				)
+		{{ end }}
 	{{ end }}
-		ORDER BY {{ .OrderOn }} {{ AscOrDesc .Ascending }}, id ASC
+		ORDER BY {{ .OrderOn }} {{ AscOrDesc .GTELTE }}, id ASC
 		LIMIT ?;	
 	`, queryTD{
 		DoJoin:    doJoin,    // if there is a query, do join
 		FirstPage: firstPage, // lastID != nil implies that lastOrderedValue != nil as well
 		OrderOn:   orderOn(orderBy),
 		Ascending: ascending,
+		GTELTE: ascending != backward,
+		Forward: !backward,
 	}, template.FuncMap{
 		"GTEorLTE": func(ascending bool) string {
 			// TODO: or maybe vice versa idk
