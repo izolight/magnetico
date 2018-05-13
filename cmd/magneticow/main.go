@@ -185,7 +185,7 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	limit := uint(20)
 
 	var lastOrderedValue uint64
-	var startID, lastID uint64
+	var startID, firstID, lastID uint64
 
 	var err error
 
@@ -264,9 +264,19 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if queryValues.Get("startID") != "" {
-		startID, err = strconv.ParseUint(queryValues.Get("startID"),10, 64)
-	} else {
+		startID, err = strconv.ParseUint(queryValues.Get("startID"), 10, 64)
+	} else if len(torrents)!= 0 {
 		startID = uint64(torrents[0].ID)
+	}
+
+	var firstOrdered, lastOrdered interface{}
+	var isFirstPage bool
+	if len(torrents) != 0 {
+		firstOrdered = torrents[0].DiscoveredOn
+		lastOrdered = torrents[len(torrents)-1].DiscoveredOn
+		firstID = uint64(torrents[0].ID)
+		lastID = uint64(torrents[len(torrents)-1].ID)
+		isFirstPage = startID == uint64(torrents[0].ID) || startID == uint64(torrents[len(torrents)-1].ID)
 	}
 
 	// TODO: for testing, REMOVE
@@ -275,20 +285,20 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	// 72 -> 92 (current)
 
 	templates["torrents"].Execute(w, TorrentsTD{
-		Search:               search,
-		SubscriptionURL:      "borabora",
-		Torrents:             torrents,
-		Epoch:                epoch.Unix(),
-		OrderBy:              qOrderBy,
-		Ascending:            ascending,
-		Limit:                limit,
-		FirstOrderedValue:    torrents[0].DiscoveredOn,
-		LastOrderedValue:     torrents[len(torrents)-1].DiscoveredOn,
-		StartID:              startID,
-		FirstID:              uint64(torrents[0].ID),
-		LastID:               uint64(torrents[len(torrents)-1].ID),
-		NextPageExists:       len(torrents) >= 20,
-		IsFirstPage:          startID == uint64(torrents[0].ID) || startID == uint64(torrents[len(torrents)-1].ID),
+		Search:            search,
+		SubscriptionURL:   "borabora",
+		Torrents:          torrents,
+		Epoch:             epoch.Unix(),
+		OrderBy:           qOrderBy,
+		Ascending:         ascending,
+		Limit:             limit,
+		FirstOrderedValue: firstOrdered,
+		LastOrderedValue:  lastOrdered,
+		StartID:           startID,
+		FirstID:           firstID,
+		LastID:            lastID,
+		NextPageExists:    len(torrents) >= 20,
+		IsFirstPage:       isFirstPage,
 	})
 
 }
