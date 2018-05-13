@@ -621,12 +621,19 @@ func (db *sqlite3Database) setupDatabase() error {
 			  INSERT INTO torrents_idx(rowid, name) VALUES (new.id, new.name);
 			END;
 
-            -- Add column modified_on
-			ALTER TABLE torrents ADD COLUMN modified_on INTEGER;
-			CREATE INDEX modified_on_index ON torrents (modified_on);
-			UPDATE torrents SET torrents.modified_on = (SELECT discovered_on);
-
 			PRAGMA user_version = 3;
+		`)
+		if err != nil {
+			return fmt.Errorf("sql.Tx.Exec (v2 -> v3): %s", err.Error())
+		}
+		fallthrough
+	case 3:
+		zap.L().Warn("Updating database schema from 3 to 4... (this might take a while)")
+		tx.Exec(`
+		CREATE INDEX updated_on_index ON torrents (updated_on);
+		UPDATE torrents SET updated_on = (SELECT discovered_on);
+
+		PRAGMA user_version = 4;
 		`)
 		if err != nil {
 			return fmt.Errorf("sql.Tx.Exec (v2 -> v3): %s", err.Error())
