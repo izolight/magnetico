@@ -16,6 +16,7 @@ import (
 	"github.com/Wessie/appdirs"
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/handlers"
 	"github.com/jessevdk/go-flags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -112,10 +113,8 @@ func main() {
 	router.HandleFunc("/torrents", torrentsHandler)
 	router.HandleFunc("/torrents/{infohash:[a-z0-9]{40}}", torrentsInfohashHandler)
 	router.HandleFunc("/statistics", statisticsHandler)
-
-	router.PathPrefix("/static").HandlerFunc(staticHandler)
-
 	router.HandleFunc("/feed", feedHandler)
+	router.PathPrefix("/static").HandlerFunc(staticHandler)
 
 	templateFunctions := template.FuncMap{
 		"add": func(augend int, addends int) int {
@@ -160,7 +159,8 @@ func main() {
 	}
 
 	zap.L().Info("magneticow is ready to serve!")
-	http.ListenAndServe(opFlags.BindAddr, router)
+
+	http.ListenAndServe(opFlags.BindAddr, handlers.CombinedLoggingHandler(os.Stdout, router))
 }
 
 // DONE
