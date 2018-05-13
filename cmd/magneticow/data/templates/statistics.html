@@ -12,29 +12,33 @@
 <body>
 <header>
     <script>
-        var torrentsData = [{
+        var torrentsData = {
             x: {{ .Dates }},
             y: {{ .Stats.NTorrents }},
-            mode: "lines+markers"
-        }];
-        var filesData = [{
+            mode: "lines+markers",
+            name: 'Torrents',
+        };
+        var filesData = {
             x: {{ .Dates }},
             y: {{ .Stats.NFiles }},
-            mode: "lines+markers"
-        }];
-        var sizeData = [{
+            mode: "lines+markers",
+            name: 'Files',
+            yaxis: 'y2',
+        };
+        var sizeData = {
             x: {{ .Dates }},
             y: {{ .Stats.TotalSize }},
-            mode: "lines+markers"
-        }];
+            mode: "lines+markers",
+            name: 'Size',
+            yaxis: 'y3',
+        };
+        var data = [torrentsData, filesData, sizeData]
     </script>
 
     <div><a href="/"><b>magnetico<sup>w</sup></b></a>&#8203;<sub>(pre-alpha)</sub></div>
 </header>
 <main>
     <div id="torrentGraph"></div>
-    <div id="filesGraph"></div>
-    <div id="sizeGraph"></div>
 </main>
 </body>
 </html>
