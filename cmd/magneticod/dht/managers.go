@@ -1,8 +1,9 @@
 package dht
 
 import (
-	"github.com/boramalper/magnetico/cmd/magneticod/dht/mainline"
 	"net"
+
+	"github.com/izolight/magnetico/cmd/magneticod/dht/mainline"
 )
 
 type TrawlingManager struct {

@@ -2,12 +2,13 @@ package persistence
 
 import (
 	"encoding/hex"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"net/url"
 	"os"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 const (

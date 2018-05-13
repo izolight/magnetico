@@ -2,11 +2,11 @@ package mainline
 
 import (
 	"crypto/rand"
+	"encoding/hex"
 	"net"
 	"sync"
 	"time"
 
-	"encoding/hex"
 	"github.com/anacrolix/torrent"
 	"github.com/anacrolix/torrent/metainfo"
 	"go.uber.org/zap"

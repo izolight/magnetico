@@ -3,13 +3,13 @@ package persistence
 import (
 	"database/sql"
 	"fmt"
-	"go.uber.org/zap"
+	"net/url"
 	"time"
+	"unicode/utf8"
 
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
-	"net/url"
-	"unicode/utf8"
+	"go.uber.org/zap"
 )
 
 type postgresDatabase struct {

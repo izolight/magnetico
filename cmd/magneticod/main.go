@@ -4,22 +4,21 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net"
+	"net/url"
 	"os"
 	"os/signal"
 	"path"
 	"runtime/pprof"
 	"time"
 
+	"github.com/Wessie/appdirs"
 	"github.com/jessevdk/go-flags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/boramalper/magnetico/cmd/magneticod/bittorrent"
-	"github.com/boramalper/magnetico/cmd/magneticod/dht"
-
-	"github.com/Wessie/appdirs"
-	"github.com/boramalper/magnetico/pkg/persistence"
-	"net/url"
+	"github.com/izolight/magnetico/cmd/magneticod/bittorrent"
+	"github.com/izolight/magnetico/cmd/magneticod/dht"
+	"github.com/izolight/magnetico/pkg/persistence"
 )
 
 type cmdFlags struct {

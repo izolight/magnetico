@@ -4,23 +4,23 @@ import (
 	"encoding/hex"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Wessie/appdirs"
 	"github.com/dustin/go-humanize"
 	"github.com/gorilla/mux"
+	"github.com/jessevdk/go-flags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/Wessie/appdirs"
-	"github.com/boramalper/magnetico/pkg/persistence"
-	"github.com/jessevdk/go-flags"
-	"net/url"
-	"path"
-	"net"
+	"github.com/izolight/magnetico/pkg/persistence"
 )
 
 const N_TORRENTS = 20

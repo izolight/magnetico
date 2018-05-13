@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -13,11 +14,9 @@ import (
 
 	"github.com/anacrolix/torrent/bencode"
 	"github.com/anacrolix/torrent/metainfo"
-
 	"go.uber.org/zap"
 
-	"encoding/hex"
-	"github.com/boramalper/magnetico/pkg/persistence"
+	"github.com/izolight/magnetico/pkg/persistence"
 )
 
 const MAX_METADATA_SIZE = 10 * 1024 * 1024

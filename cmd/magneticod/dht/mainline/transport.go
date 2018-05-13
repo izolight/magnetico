@@ -2,10 +2,10 @@ package mainline
 
 import (
 	"net"
+	"strings"
 
 	"github.com/anacrolix/torrent/bencode"
 	"go.uber.org/zap"
-	"strings"
 )
 
 type Transport struct {

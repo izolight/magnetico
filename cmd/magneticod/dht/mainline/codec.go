@@ -9,11 +9,11 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
+	"regexp"
 
 	"github.com/anacrolix/missinggo/iter"
 	"github.com/anacrolix/torrent/bencode"
 	"github.com/willf/bloom"
-	"regexp"
 )
 
 type Message struct {
