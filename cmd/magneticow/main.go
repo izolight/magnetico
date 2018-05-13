@@ -36,7 +36,7 @@ type cmdFlags struct {
 
 type opFlags struct {
 	DatabaseURL *url.URL
-	BindAddr	string
+	BindAddr    string
 	Verbosity   int
 }
 
@@ -46,25 +46,25 @@ type HomepageTD struct {
 }
 
 type TorrentsTD struct {
-	Search           string
-	SubscriptionURL  string
-	Torrents         []persistence.TorrentMetadata
-	Epoch            int64
-	OrderBy          string
-	Ascending        bool
-	Limit            uint
+	Search            string
+	SubscriptionURL   string
+	Torrents          []persistence.TorrentMetadata
+	Epoch             int64
+	OrderBy           string
+	Ascending         bool
+	Limit             uint
 	FirstOrderedValue interface{}
-	LastOrderedValue interface{}
-	StartID			 uint64
-	FirstID			 uint64
-	LastID		     uint64
-	IsFirstPage		 bool
-	NextPageExists   bool
+	LastOrderedValue  interface{}
+	StartID           uint64
+	FirstID           uint64
+	LastID            uint64
+	IsFirstPage       bool
+	NextPageExists    bool
 }
 
 type TorrentTD struct {
-	Torrent 	persistence.TorrentMetadata
-	Files		[]persistence.File
+	Torrent persistence.TorrentMetadata
+	Files   []persistence.File
 }
 
 type FeedTD struct {
@@ -182,7 +182,7 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	orderBy := persistence.ByRelevance
 	ascending := false
 	backward := false
-	limit := uint(20)
+	limit := uint(N_TORRENTS)
 
 	var lastOrderedValue uint64
 	var startID, firstID, lastID uint64
@@ -321,7 +321,7 @@ func torrentsInfohashHandler(w http.ResponseWriter, r *http.Request) {
 
 	templates["torrent"].Execute(w, TorrentTD{
 		Torrent: *torrent,
-		Files: files,
+		Files:   files,
 	})
 }
 
@@ -330,7 +330,7 @@ func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err.Error())
 	}
-	from := time.Now().Add(-30*interval)
+	from := time.Now().Add(-30 * interval)
 
 	stats, err := database.GetStatistics(30, from.Format("2006-01-02"))
 	if err != nil {

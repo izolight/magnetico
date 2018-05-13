@@ -165,7 +165,7 @@ type queryTD struct {
 	FirstPage bool
 	OrderOn   string
 	Ascending bool
-	GTELTE	  bool
+	GTELTE    bool
 	Forward   bool
 }
 
@@ -227,8 +227,8 @@ func (db *sqlite3Database) QueryTorrents(
 		FirstPage: firstPage, // lastID != nil implies that lastOrderedValue != nil as well
 		OrderOn:   orderOn(orderBy),
 		Ascending: ascending,
-		GTELTE: ascending != backward,
-		Forward: !backward,
+		GTELTE:    ascending != backward,
+		Forward:   !backward,
 	}, template.FuncMap{
 		"GTEorLTE": func(ascending bool) string {
 			// TODO: or maybe vice versa idk

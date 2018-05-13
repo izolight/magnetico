@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/hex"
-	"fmt"
 	"net"
 	"net/url"
 	"os"
@@ -162,16 +161,4 @@ func parseFlags() *opFlags {
 	opF.Profile = cmdF.Profile
 
 	return opF
-}
-
-func checkAddrs(addrs []string) error {
-	for i, addr := range addrs {
-		// We are using ResolveUDPAddr but it works equally well for checking TCPAddr(esses) as
-		// well.
-		_, err := net.ResolveUDPAddr("udp", addr)
-		if err != nil {
-			return fmt.Errorf("with %d(th) address `%s`: %s", i+1, addr, err.Error())
-		}
-	}
-	return nil
 }
