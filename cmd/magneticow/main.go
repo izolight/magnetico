@@ -167,7 +167,11 @@ func main() {
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	count, err := database.GetNumberOfTorrents()
 	if err != nil {
-		panic(err.Error())
+		zap.L().Error("Couldn't get number of torrents",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	templates["homepage"].Execute(w, HomepageTD{
 		Count: count,
@@ -218,7 +222,11 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	if qLimit != "" {
 		l, err := strconv.ParseUint(qLimit, 10, 64)
 		if err != nil {
-			panic(err.Error())
+			zap.L().Error("Couldn't parse limit",
+				zap.Error(err),
+			)
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		limit = uint(l)
 	}
@@ -226,7 +234,11 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	if queryValues.Get("epoch") != "" {
 		qEpoch, err := strconv.ParseInt(queryValues.Get("epoch"), 10, 64)
 		if err != nil {
-			panic(err.Error())
+			zap.L().Error("Couldn't parse epoch",
+				zap.Error(err),
+			)
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		epoch = time.Unix(qEpoch, 0)
 
@@ -236,11 +248,19 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 		if qLastOrderedValue != "" && qLastID != "" {
 			lastOrderedValue, err = strconv.ParseUint(qLastOrderedValue, 10, 64)
 			if err != nil {
-				panic(err.Error())
+				zap.L().Error("Couldn't parse lastOrderedValue",
+					zap.Error(err),
+				)
+				w.WriteHeader(http.StatusBadRequest)
+				return
 			}
 			lastID, err = strconv.ParseUint(qLastID, 10, 64)
 			if err != nil {
-				panic(err.Error())
+				zap.L().Error("Couldn't parse lastID",
+					zap.Error(err),
+				)
+				w.WriteHeader(http.StatusBadRequest)
+				return
 			}
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
@@ -260,7 +280,11 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 		backward,
 	)
 	if err != nil {
-		panic(err.Error())
+		zap.L().Error("Couldn't get torrents from database",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	if queryValues.Get("startID") != "" {
@@ -305,16 +329,36 @@ func torrentsInfohashHandler(w http.ResponseWriter, r *http.Request) {
 	// show torrents/{infohash}
 	infoHash, err := hex.DecodeString(mux.Vars(r)["infohash"])
 	if err != nil {
-		panic(err.Error())
+		zap.L().Error("Couldn't decode infohash",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	torrent, err := database.GetTorrent(infoHash)
 	if err != nil {
-		panic(err.Error())
+		zap.L().Error("Couldn't get torrent from database",
+			zap.Error(err),
+			zap.String("infohash", string(infoHash)),
+		)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+
+	if torrent == nil {
+		http.NotFound(w, r)
+		return
+	}
+
 	files, err := database.GetFiles(infoHash)
 	if err != nil {
-		panic(err.Error())
+		zap.L().Error("Couldn't get files from database",
+			zap.Error(err),
+			zap.String("infohash", string(infoHash)),
+		)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	templates["torrent"].Execute(w, TorrentTD{
@@ -326,13 +370,22 @@ func torrentsInfohashHandler(w http.ResponseWriter, r *http.Request) {
 func statisticsHandler(w http.ResponseWriter, r *http.Request) {
 	interval, err := time.ParseDuration("24h")
 	if err != nil {
-		panic(err.Error())
+		zap.L().Error("Couldn't parse Interval",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 	from := time.Now().Add(-30 * interval)
 
 	stats, err := database.GetStatistics(30, from.Format("2006-01-02"))
 	if err != nil {
-		panic(err.Error())
+		zap.L().Error("Couldn't get parse dateformat",
+			zap.Error(err),
+			zap.Time("date", from),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	var dates []string
