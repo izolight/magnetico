@@ -363,6 +363,7 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 	} else { // fallback option
 		contentType = http.DetectContentType(data)
 	}
+	w.Header().Set("Cache-Control", "max-age=86400")
 	w.Header().Set("Content-Type", contentType)
 	w.Write(data)
 }
