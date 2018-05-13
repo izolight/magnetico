@@ -17,8 +17,8 @@
             y: {{ .Stats.NTorrents }},
             mode: "lines+markers"
         };
-        /*        var filesData = {
-                    x: {{ .Dates }},
+        var filesData = {
+            x: {{ .Dates }},
             y: {{ .Stats.NFiles }},
             mode: "lines+markers"
         };
@@ -26,7 +26,7 @@
             x: {{ .Dates }},
             y: {{ .Stats.TotalSize }},
             mode: "lines+markers"
-        };*/
+        };
         var discoveryRateData = [torrentsData];
     </script>
 
