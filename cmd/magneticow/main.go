@@ -282,8 +282,6 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: for testing, REMOVE
 	//torrents[2].HasReadme = true
 
-	// 72 -> 92 (current)
-
 	templates["torrents"].Execute(w, TorrentsTD{
 		Search:            search,
 		SubscriptionURL:   "borabora",

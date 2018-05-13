@@ -1,7 +1,7 @@
 all: magneticod magneticow
 
 magneticod:
-	go install ./cmd/magneticod
+	go install -tags fts5 ./cmd/magneticod
 
 magneticow:
 	# TODO: minify files!
