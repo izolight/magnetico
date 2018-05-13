@@ -25,8 +25,8 @@ var layout = {
     },
     yaxis3: {
         title: "Bytes",
-        titlefont: {color: '#d62728'},
-        tickfont: {color: '#d62728'},
+        titlefont: {color: '#2ca02c'},
+        tickfont: {color: '#2ca02c'},
         anchor: 'x',
         overlaying: 'y',
         side: 'right',
