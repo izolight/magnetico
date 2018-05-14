@@ -138,7 +138,7 @@ func main() {
 			// > year 2006, 15 for the hour, Monday for the day of the week, etc.
 			// https://gobyexample.com/time-formatting-parsing
 			// Why you gotta be so weird Go?
-			return tm.Format("02/01/2006")
+			return tm.Format("2006-01-02 15:04")
 		},
 
 		"humanizeSize": func(s uint64) string {
