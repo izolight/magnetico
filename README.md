@@ -14,7 +14,11 @@ central entity*.
 **magnetico** liberates BitTorrent from the yoke of centralised trackers & web-sites and makes it
 *truly decentralised*. Finally!
 
-This is a continuation of the original ![magnetico](https://github.com/boramalper/magnetico)
+This is a continuation of the original ![magnetico](https://github.com/boramalper/magnetico) and has the following improvements
+- Support for postgres in addition to sqlite (magneticod only for now)
+- enhanced configuration via enviroment variables
+- fixed a bug that prevent single torrents with just 1 file from being added
+- magneticow is working again (go variant) and has enhanced statistics
 
 ## Features
 - Easy installation & minimal requirements:
