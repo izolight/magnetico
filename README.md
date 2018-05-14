@@ -1,8 +1,6 @@
 # magnetico
 *Autonomous (self-hosted) BitTorrent DHT search engine suite.*
 
-[![chat on gitter](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/magnetico-dev/magnetico-dev)&emsp;[![Build Status on Travis CI](https://travis-ci.org/boramalper/magnetico.svg?branch=go-rewrite)](https://travis-ci.org/boramalper/magnetico)&ensp;[![Build status on AppVeyor](https://ci.appveyor.com/api/projects/status/u2jtbe6jutya7p0x/branch/go-rewrite?svg=true)](https://ci.appveyor.com/project/boramalper/magnetico/branch/go-rewrite)
-
 magnetico is the first autonomous (self-hosted) BitTorrent DHT search engine suite that is *designed
 for end-users*. The suite consists of two packages:
 
@@ -16,9 +14,11 @@ central entity*.
 **magnetico** liberates BitTorrent from the yoke of centralised trackers & web-sites and makes it
 *truly decentralised*. Finally!
 
+This is a continuation of the original ![magnetico](https://github.com/boramalper/magnetico)
+
 ## Features
 - Easy installation & minimal requirements:
-  - Python 3.5+ and a few Python packages that is available on PyPI.
+  - Static binaries, no dependencies required
   - Root access is *not* required to install.
 - Near-zero configuration:
   - magneticod works out of the box, and magneticow requires minimal configuration to work with the
@@ -71,23 +71,32 @@ for torrents in the network, hence removing the need for centralised torrent web
 > (indirectly) assisting those content to spread around, follow the **magneticow** installation
 > instructions carefully to password-protect the web-interface from others.
 
-> **WARNING:**
->
-> Do NOT clone the [repository](https://github.com/boramalper/magnetico) to install **magnetico**,
-> as it is never meant to be stable (except
-> [releases](https://github.com/boramalper/magnetico/releases) of course).
+0. Install ![dep](https://github.com/golang/dep) and ![go-bindata](https://github.com/jteeuwen/go-bindata)
+1. Install via ```go get -tags fts5 github.com/izolight/magnetico/...```
+2. The **magneticod** binary should be now under $GOPATH/bin (default is ~/go/bin). If not we will build it together with magneticow later
+3. For **magneticow** additional steps are required
+4. Navigate to $GOPATH/src/github.com/izolight/magnetico
+5. Run ```make all``` to install both or ```make magneticow``` for just magneticow (or follow the commands in the Makefile)
 
-1. Install **magneticod** first by following its [installation instructions](magneticod/README.md).
-2. Install **magneticow** afterwards by following its
-   [installation instructions](magneticow/README.rst).
+## How to use
+
+Both work out of the box without configuration, but you can set options for more control.
+
+### magneticod
+
+You can set the database-url via the -d flag or $DATABASE environment variable.
+
+The Address that we should accept connections (allow this udp port on your firewall if necessary) on can be configured via the -b flag or $BIND_ADDR environment variable (accepts multiple values).
+
+The interval can be configured via the -i flag or $INTERVAL environment variable and is in milliseconds (default should be fine for most use cases).
+
+For increased verbosity you can add -v or for even more -vv.
+
+### magneticow
+
+You can set the database-url and address similar to magneticod.
 
 ## License
 
 All the code is licensed under AGPLv3, unless otherwise stated in the source specific source. See
 `COPYING` file for the full license text.
-
-----
-
-Dedicated to Cemile Binay, in whose hands I thrived.
-
-Bora M. ALPER <[bora@boramalper.org](mailto:bora@boramalper.org)>
