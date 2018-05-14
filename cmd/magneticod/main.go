@@ -22,7 +22,7 @@ import (
 
 type cmdFlags struct {
 	DatabaseURL string   `short:"d" long:"database" description:"URL of the database." env:"DATABASE"`
-	BindAddr    []string `short:"b" long:"bind" description:"Address(es) that the Crawler should listen on." env:"BIND_ADDR" env-delim:"," default:"0.0.0.0:0"`
+	BindAddr    []string `short:"b" long:"bind" description:"Address(es) that the Crawler should listen on." env:"BIND_ADDR" env-delim:"," default:"0.0.0.0:6881"`
 	Interval    uint     `short:"i" long:"interval" description:"Trawling Interval in milliseconds" env:"INTERVAL" default:"100"`
 	Verbose     []bool   `short:"v" long:"verbose" description:"Increase verbosity"`
 	Profile     string   `short:"p" long:"profile" description:"Enable profiling." choice:"cpu" choice:"memory" choice:"trace"`

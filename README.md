@@ -19,6 +19,7 @@ This is a continuation of the original ![magnetico](https://github.com/boramalpe
 - enhanced configuration via enviroment variables
 - fixed a bug that prevent single torrents with just 1 file from being added
 - magneticow is working again (go variant) and has enhanced statistics
+- Docker Images for magneticod and magneticow available
 
 ## Features
 - Easy installation & minimal requirements:
@@ -75,12 +76,22 @@ for torrents in the network, hence removing the need for centralised torrent web
 > (indirectly) assisting those content to spread around, follow the **magneticow** installation
 > instructions carefully to password-protect the web-interface from others.
 
-0. Install ![dep](https://github.com/golang/dep) and ![go-bindata](https://github.com/jteeuwen/go-bindata)
-1. Install via ```go get -tags fts5 github.com/izolight/magnetico/...```
-2. The **magneticod** binary should be now under $GOPATH/bin (default is ~/go/bin). If not we will build it together with magneticow later
-3. For **magneticow** additional steps are required
-4. Navigate to $GOPATH/src/github.com/izolight/magnetico
-5. Run ```make all``` to install both or ```make magneticow``` for just magneticow (or follow the commands in the Makefile)
+### Docker
+
+Use the following images:
+- izolight/magneticod (Uses Port 6881 udp as default)
+- izolight/magneticow (Uses Port 8080 as default)
+
+If you don't set a DATABASE variable it will default to ~/.local/share/magnetico/database.sqlite3 which is inside the container, so that should be a volume which is attached to both containers.
+
+### compile from source
+
+1. Install ![dep](https://github.com/golang/dep) and ![go-bindata](https://github.com/jteeuwen/go-bindata)
+2. Install via ```go get -tags fts5 github.com/izolight/magnetico/...```
+3. The **magneticod** binary should be now under $GOPATH/bin (default is ~/go/bin). If not we will build it together with magneticow later
+4. For **magneticow** additional steps are required
+5. Navigate to $GOPATH/src/github.com/izolight/magnetico
+6. Run ```make all``` to install both or ```make magneticow``` for just magneticow (or follow the commands in the Makefile)
 
 ## How to use
 
