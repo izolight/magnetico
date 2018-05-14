@@ -137,15 +137,14 @@ func (db *sqlite3Database) Close() error {
 }
 
 func (db *sqlite3Database) GetNumberOfTorrents() (uint, error) {
-	// COUNT(1) is much more inefficient since it scans the whole table, so use MAX(ROWID).
-	// Keep in mind that the value returned by GetNumberOfTorrents() might be an approximation.
-	rows, err := db.conn.Query("SELECT MAX(ROWID) FROM torrents;")
+	// COUNT is more accurate if the db has been merged from multiple dbs.
+	rows, err := db.conn.Query("SELECT COUNT(ID) FROM torrents;")
 	if err != nil {
 		return 0, err
 	}
 
 	if rows.Next() != true {
-		fmt.Errorf("No rows returned from `SELECT MAX(ROWID)`")
+		fmt.Errorf("No rows returned from `SELECT COUNT(ID)`")
 	}
 
 	var n uint
