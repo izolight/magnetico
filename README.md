@@ -14,7 +14,7 @@ central entity*.
 **magnetico** liberates BitTorrent from the yoke of centralised trackers & web-sites and makes it
 *truly decentralised*. Finally!
 
-This is a continuation of the original ![magnetico](https://github.com/boramalper/magnetico) and has the following improvements
+This is a continuation of the original [magnetico](https://github.com/boramalper/magnetico) and has the following improvements
 - Support for postgres in addition to sqlite (magneticod only for now)
 - enhanced configuration via enviroment variables
 - fixed a bug that prevent single torrents with just 1 file from being added
@@ -86,7 +86,7 @@ If you don't set a DATABASE variable it will default to ~/.local/share/magnetico
 
 ### compile from source
 
-1. Install ![dep](https://github.com/golang/dep) and ![go-bindata](https://github.com/jteeuwen/go-bindata)
+1. Install [dep](https://github.com/golang/dep) and [go-bindata](https://github.com/jteeuwen/go-bindata)
 2. Install via ```go get -tags fts5 github.com/izolight/magnetico/...```
 3. The **magneticod** binary should be now under $GOPATH/bin (default is ~/go/bin). If not we will build it together with magneticow later
 4. For **magneticow** additional steps are required
