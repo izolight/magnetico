@@ -144,7 +144,29 @@ func (db *sqlite3Database) GetNumberOfTorrents() (uint, error) {
 	}
 
 	if rows.Next() != true {
-		fmt.Errorf("No rows returned from `SELECT COUNT(ID)`")
+		return 0, fmt.Errorf("No rows returned from `SELECT COUNT(ID)`")
+	}
+
+	var n uint
+	if err = rows.Scan(&n); err != nil {
+		return 0, err
+	}
+
+	if err = rows.Close(); err != nil {
+		return 0, err
+	}
+
+	return n, nil
+}
+
+func (db *sqlite3Database) GetTotalSizeOfTorrents() (uint, error) {
+	rows, err := db.conn.Query("SELECT SUM(total_size) FROM torrents;")
+	if err != nil {
+		return 0, err
+	}
+
+	if rows.Next() != true {
+		return 0, fmt.Errorf("No rows returned from `SELECT SUM(total_size)`")
 	}
 
 	var n uint

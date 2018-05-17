@@ -44,6 +44,7 @@ type opFlags struct {
 // ========= TD: TemplateData =========
 type HomepageTD struct {
 	Count uint
+	Size uint
 }
 
 type TorrentsTD struct {
@@ -148,7 +149,7 @@ func main() {
 
 	templates = make(map[string]*template.Template)
 	templates["feed"] = template.Must(template.New("feed").Parse(string(mustAsset("templates/feed.xml"))))
-	templates["homepage"] = template.Must(template.New("homepage").Parse(string(mustAsset("templates/homepage.html"))))
+	templates["homepage"] = template.Must(template.New("homepage").Funcs(templateFunctions).Parse(string(mustAsset("templates/homepage.html"))))
 	templates["statistics"] = template.Must(template.New("statistics").Parse(string(mustAsset("templates/statistics.html"))))
 	templates["torrent"] = template.Must(template.New("torrent").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrent.html"))))
 	templates["torrents"] = template.Must(template.New("torrents").Funcs(templateFunctions).Parse(string(mustAsset("templates/torrents.html"))))
@@ -173,8 +174,19 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	size, err := database.GetTotalSizeOfTorrents()
+	if err != nil {
+		zap.L().Error("Couldn't get size of torrents",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	templates["homepage"].Execute(w, HomepageTD{
 		Count: count,
+		Size: size,
 	})
 }
 

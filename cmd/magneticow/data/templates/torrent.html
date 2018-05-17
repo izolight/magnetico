@@ -51,7 +51,7 @@
     <!-- Content of this element will be overwritten by the script -->
     <pre>
 {{ range .Files }}
-{{ .Path }}     {{ .Size }}
+{{ .Path }}     {{ humanizeSize .Size }}
 {{ end }}
     </pre>
 </main>
