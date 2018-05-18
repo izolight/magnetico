@@ -71,7 +71,7 @@ func (db *postgresDatabase) AddNewTorrent(infoHash []byte, name string, files []
 
 	defer tx.Rollback()
 
-	var totalSize int64
+	var totalSize uint64
 	for _, files := range files {
 		totalSize += files.Size
 	}

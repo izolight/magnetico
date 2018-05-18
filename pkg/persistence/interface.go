@@ -67,7 +67,7 @@ type Statistics struct {
 }
 
 type File struct {
-	Size int64
+	Size uint64
 	Path string
 }
 
