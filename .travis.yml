@@ -9,7 +9,7 @@ before_install:
   - "sudo apt-get install go-bindata"
 
 install:
-  - "go get -t fts5 ./..."
+  - "go get --tags fts5 -t ./..."
 
 script:
   - make all
