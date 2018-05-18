@@ -2,21 +2,18 @@ sudo: enabled
 dist: xenial
 language: go
 go:
-  - 1.8.3
+  - 1.10
+  - tip
 
 before_install:
-  - "sudo apt-get update -qq"
-  - "sudo apt-get install python3-dev"
-  - "pip3 install mypy pylint"
-
-  - ""
+  - "sudo apt-get install go-bindata"
 
 install:
-  - "pip3 install ./magneticod"
-  - "pip3 install ./magneticow"
+  - "go get -t fts5 ./..."
 
 script:
-  - "pylint ./magneticod/magneticod"
-  - "pylint ./magneticow/magneticow"
-  - "mypy --ignore-missing-imports --follow-imports=skip ./magneticod/magneticod"
-  - "mypy --ignore-missing-imports --follow-imports=skip ./magneticow/magneticow"
+  - make all
+  - go test -race -coverprofile=coverage.txt -covermode=atomic
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
