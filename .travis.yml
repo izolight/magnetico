@@ -12,7 +12,7 @@ install:
   - "go get --tags fts5 -t ./..."
 
 script:
-  - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+  - go test ./cmd/... -race -coverprofile=coverage.txt -covermode=atomic
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
