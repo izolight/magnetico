@@ -613,7 +613,7 @@ func (db *sqlite3Database) setupDatabase() error {
 		}
 		fallthrough
 
-	case 2: // NOT FROZEN! (subject to change or complete removal)
+	case 2:
 		// Upgrade from user_version 2 to 3
 		// Changes:
 		//   * Created `torrents_idx` FTS5 virtual table.
@@ -622,7 +622,6 @@ func (db *sqlite3Database) setupDatabase() error {
 		//     * https://sqlite.org/fts5.html
 		//     * https://sqlite.org/fts3.html
 		//
-		//   * Added `n_files` column to the `torrents` table.
 		zap.L().Warn("Updating database schema from 2 to 3... (this might take a while)")
 		tx.Exec(`
 			CREATE VIRTUAL TABLE torrents_idx USING fts5(name, content='torrents', content_rowid='id', tokenize="porter unicode61 separators ' !""#$%&''()*+,-./:;<=>?@[\]^_` + "`" + `{|}~'");
@@ -649,6 +648,9 @@ func (db *sqlite3Database) setupDatabase() error {
 		}
 		fallthrough
 	case 3:
+		// Upgrade from user_version 3 to 4
+		// Changes:
+		//   * Add index for updated_on and set initial values to discovered_on
 		zap.L().Warn("Updating database schema from 3 to 4... (this might take a while)")
 		tx.Exec(`
 		CREATE INDEX updated_on_index ON torrents (updated_on);
@@ -659,6 +661,14 @@ func (db *sqlite3Database) setupDatabase() error {
 		if err != nil {
 			return fmt.Errorf("sql.Tx.Exec (v2 -> v3): %s", err.Error())
 		}
+	case 4:
+		// Upgrade from user_version 4 to 5
+		// Changes:
+		//   * Add table for caching of stats and precompute them
+		zap.L().Warn("Updating database schema from 4 to 5... (this might take a while)")
+		tx.Exec(`
+		CREATE TABLE statistics
+		`)
 	}
 
 	if err = tx.Commit(); err != nil {
