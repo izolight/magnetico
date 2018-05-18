@@ -367,3 +367,118 @@ func fixUTF8Encoding(in string) string {
 	}
 	return "Invalid UTF-8"
 }
+
+func (db *postgresDatabase) GenerateStatisticData(from time.Time) error {
+	duration, err := time.ParseDuration("1h")
+	if err != nil {
+		return err
+	}
+
+	tx, err := db.conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	until := from.Add(duration)
+	var nTorrents, nFiles, totalSize uint64
+
+	row := db.conn.QueryRow(`
+			SELECT COUNT(id)
+			FROM torrents
+			WHERE discovered_on > ?
+			AND discovered_on <= ?
+			`,
+		from, until)
+	err = row.Scan(&nTorrents)
+	if err != nil {
+		return err
+	}
+
+	if nTorrents != 0 {
+		err = db.conn.QueryRow(`
+			SELECT COUNT(f.id)
+			FROM files f
+			INNER JOIN torrents t
+			ON f.torrent_id = t.id
+			WHERE t.discovered_on > ?
+			AND t.discovered_on <= ?
+			`, from, until).Scan(&nFiles)
+		if err != nil {
+			return err
+		}
+
+		err = db.conn.QueryRow(`
+			SELECT SUM(total_size)
+			FROM torrents
+			WHERE discovered_on > ?
+			AND discovered_on <= ? 
+			`, from, until).Scan(&totalSize)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = tx.Exec(`
+		INSERT INTO statistics (
+			from_date,
+			to_date,
+			torrents,
+			files,
+			size
+		) VALUES (?, ?, ?, ?, ?);
+	`, from, until, nTorrents, nFiles, totalSize)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *postgresDatabase) GetFirstTorrentDate() (*time.Time, error) {
+	row := db.conn.QueryRow(`
+		SELECT discovered_on
+		FROM torrents
+		ORDER BY discovered_on ASC
+		LIMIT 1	
+	`)
+
+	var date *time.Time
+	if err := row.Scan(&date); err != nil {
+		return nil, err
+	}
+
+	return date, nil
+}
+
+func (db *postgresDatabase) GetLastTorrentDate() (*time.Time, error) {
+	row := db.conn.QueryRow(`
+		SELECT discovered_on
+		FROM torrents
+		ORDER BY discovered_on DESC
+		LIMIT 1
+	`)
+
+	var date *time.Time
+	if err := row.Scan(&date); err != nil {
+		return nil, err
+	}
+
+	return date, nil
+}
+
+func (db *postgresDatabase) GetLatestStatisticsDate() (*time.Time, error) {
+	row := db.conn.QueryRow(`
+		SELECT to_date
+		FROM statistics
+		ORDER BY to_date DESC
+		LIMIT 1
+	`)
+
+	var date *time.Time
+	if err := row.Scan(&date); err != nil {
+		return nil, err
+	}
+
+	return date, nil
+}

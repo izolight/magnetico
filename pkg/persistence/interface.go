@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"go.uber.org/zap"
+	"time"
 )
 
 type Database interface {
@@ -37,6 +38,10 @@ type Database interface {
 	GetTorrent(infoHash []byte) (*TorrentMetadata, error)
 	GetFiles(infoHash []byte) ([]File, error)
 	GetStatistics(n uint, from string) (*Statistics, error)
+	GenerateStatisticData(from time.Time) error
+	GetFirstTorrentDate() (*time.Time, error)
+	GetLastTorrentDate() (*time.Time, error)
+	GetLatestStatisticsDate() (*time.Time, error)
 }
 
 type OrderingCriteria uint8
