@@ -7,6 +7,7 @@ go:
 
 before_install:
   - "sudo apt-get install go-bindata"
+  - 'go-bindata -o="cmd/magneticow/bindata.go" -prefix="cmd/magneticow/data/" cmd/magneticow/data/...'
 
 install:
   - "go get --tags fts5 -t ./..."
