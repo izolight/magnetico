@@ -327,6 +327,22 @@ func (db *postgresDatabase) setupDatabase() error {
 		if err != nil {
 			return fmt.Errorf("sql.Tx.Exec (v0 -> v1): %s", err.Error())
 		}
+	case "1":
+		zap.L().Warn("Updating database schema from 1 to 2... (this might take a while)")
+		_, err = tx.Exec(`
+				CREATE TABLE IF NOT EXISTS statistics (
+			id			SERIAL PRIMARY KEY,
+			from_date	TIMESTAMP NOT NULL,
+			to_date		TIMESTAMP NOT NULL,
+			torrents	BIGINT NOT NULL,
+			size		BIGINT NOT NULL,
+			files		BIGINT NOT NULL,
+		);
+		UPDATE settings SET value = '2' WHERE name = 'SCHEMA_VERSION';
+		`)
+		if err != nil {
+			return fmt.Errorf("sql.Tx.Exec (v0 -> v1): %s", err.Error())
+		}
 	}
 
 	if err = tx.Commit(); err != nil {

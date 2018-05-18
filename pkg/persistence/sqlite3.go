@@ -623,7 +623,7 @@ func (db *sqlite3Database) setupDatabase() error {
 		//     * https://sqlite.org/fts3.html
 		//
 		zap.L().Warn("Updating database schema from 2 to 3... (this might take a while)")
-		tx.Exec(`
+		_, err = tx.Exec(`
 			CREATE VIRTUAL TABLE torrents_idx USING fts5(name, content='torrents', content_rowid='id', tokenize="porter unicode61 separators ' !""#$%&''()*+,-./:;<=>?@[\]^_` + "`" + `{|}~'");
             
 			-- Populate the index
@@ -652,7 +652,7 @@ func (db *sqlite3Database) setupDatabase() error {
 		// Changes:
 		//   * Add index for updated_on and set initial values to discovered_on
 		zap.L().Warn("Updating database schema from 3 to 4... (this might take a while)")
-		tx.Exec(`
+		_, err = tx.Exec(`
 		CREATE INDEX updated_on_index ON torrents (updated_on);
 		UPDATE torrents SET updated_on = (SELECT discovered_on);
 
@@ -666,9 +666,21 @@ func (db *sqlite3Database) setupDatabase() error {
 		// Changes:
 		//   * Add table for caching of stats and precompute them
 		zap.L().Warn("Updating database schema from 4 to 5... (this might take a while)")
-		tx.Exec(`
-		CREATE TABLE statistics
+		_, err = tx.Exec(`
+		CREATE TABLE IF NOT EXISTS statistics (
+			id			INTEGER PRIMARY KEY,
+			from_date	INTEGER NOT NULL,
+			to_date		INTEGER NOT NULL,
+			torrents	INTEGER NOT NULL,
+			size		INTEGER NOT NULL,
+			files		INTEGER NOT NULL
+		);
+
+		PRAGMA user_version = 5;
 		`)
+		if err != nil {
+			return fmt.Errorf("sql.Tx.Exec (v2 -> v3): %s", err.Error())
+		}
 	}
 
 	if err = tx.Commit(); err != nil {
