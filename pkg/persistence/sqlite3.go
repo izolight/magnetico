@@ -159,7 +159,7 @@ func (db *sqlite3Database) GetNumberOfTorrents() (uint, error) {
 	return n, nil
 }
 
-func (db *sqlite3Database) GetTotalSizeOfTorrents() (uint, error) {
+func (db *sqlite3Database) GetTotalSizeOfTorrents() (uint64, error) {
 	rows, err := db.conn.Query("SELECT SUM(total_size) FROM torrents;")
 	if err != nil {
 		return 0, err
@@ -169,7 +169,7 @@ func (db *sqlite3Database) GetTotalSizeOfTorrents() (uint, error) {
 		return 0, fmt.Errorf("No rows returned from `SELECT SUM(total_size)`")
 	}
 
-	var n uint
+	var n uint64
 	if err = rows.Scan(&n); err != nil {
 		return 0, err
 	}

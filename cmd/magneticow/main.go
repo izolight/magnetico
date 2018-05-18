@@ -44,7 +44,7 @@ type opFlags struct {
 // ========= TD: TemplateData =========
 type HomepageTD struct {
 	Count uint
-	Size uint
+	Size uint64
 }
 
 type TorrentsTD struct {
