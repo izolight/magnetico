@@ -2,6 +2,7 @@
 *Autonomous (self-hosted) BitTorrent DHT search engine suite.*
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/izolight/magnetico)](https://goreportcard.com/report/github.com/izolight/magnetico)
+[![Build Status](https://travis-ci.org/izolight/magnetico.svg?branch=master)](https://travis-ci.org/izolight/magnetico)
 
 magnetico is the first autonomous (self-hosted) BitTorrent DHT search engine suite that is *designed
 for end-users*. The suite consists of two packages:
