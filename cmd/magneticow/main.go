@@ -15,8 +15,8 @@ import (
 
 	"github.com/Wessie/appdirs"
 	"github.com/dustin/go-humanize"
-	"github.com/gorilla/mux"
 	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"github.com/jessevdk/go-flags"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -44,7 +44,7 @@ type opFlags struct {
 // ========= TD: TemplateData =========
 type HomepageTD struct {
 	Count uint
-	Size uint64
+	Size  uint64
 }
 
 type TorrentsTD struct {
@@ -186,7 +186,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	templates["homepage"].Execute(w, HomepageTD{
 		Count: count,
-		Size: size,
+		Size:  size,
 	})
 }
 
@@ -301,7 +301,7 @@ func torrentsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if queryValues.Get("startID") != "" {
 		startID, err = strconv.ParseUint(queryValues.Get("startID"), 10, 64)
-	} else if len(torrents)!= 0 {
+	} else if len(torrents) != 0 {
 		startID = uint64(torrents[0].ID)
 	}
 

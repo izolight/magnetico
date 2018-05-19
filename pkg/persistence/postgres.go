@@ -151,25 +151,25 @@ func (db *postgresDatabase) GetNumberOfTorrents() (uint, error) {
 }
 
 func (db *postgresDatabase) GetTotalSizeOfTorrents() (uint64, error) {
-    rows, err := db.conn.Query("SELECT SUM(total_size) FROM torrents;")
-    if err != nil {
-        return 0, err
-    }
+	rows, err := db.conn.Query("SELECT SUM(total_size) FROM torrents;")
+	if err != nil {
+		return 0, err
+	}
 
-    if rows.Next() != true {
-        return 0, fmt.Errorf("No rows returned from `SELECT SUM(total_size)`")
-    }
+	if rows.Next() != true {
+		return 0, fmt.Errorf("No rows returned from `SELECT SUM(total_size)`")
+	}
 
-    var n uint64
-    if err = rows.Scan(&n); err != nil {
-        return 0, err
-    }
+	var n uint64
+	if err = rows.Scan(&n); err != nil {
+		return 0, err
+	}
 
-    if err = rows.Close(); err != nil {
-        return 0, err
-    }
+	if err = rows.Close(); err != nil {
+		return 0, err
+	}
 
-    return n, nil
+	return n, nil
 }
 
 func (db *postgresDatabase) QueryTorrents(
