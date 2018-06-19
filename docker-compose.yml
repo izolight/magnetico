@@ -9,6 +9,9 @@ services:
       context: magneticod
     volumes:
       - shared_db:/root/.local/share
+    ports:
+      - "6881:6881"
+      - "6881:6881/udp"
 
   magneticow:
     build:
@@ -17,4 +20,4 @@ services:
       - shared_db:/root/.local/share
 
     ports:
-      - "12345:8080"
+      - "8080:8080"
